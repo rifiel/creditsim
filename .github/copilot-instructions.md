@@ -6,3 +6,6 @@ If you're unsure about a code suggestion, ask for clarification or more details.
 
 When the user asks something about Azure DevOps, make sure you are prioritizing the MCP Server for Azure DevOps.
 When the user asks something about the database, make sure you are prioritizing the MCP Server for SQLite.
+
+
+<!-- NON-NEGOTIABLE: Our coding standards are defined in Confluence in https://mcpwiki.atlassian.net/wiki/spaces/DEV/pages/2878233731/Coding+Standards+and+Best+Practices. Make sure you follow them and use the Atlassian MCP Server to access them. -->

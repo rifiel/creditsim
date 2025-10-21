@@ -19,7 +19,7 @@
          "args": [
              "-y",
              "@azure-devops/mcp",
-             "rifiel-ms"
+             "rifiel-me"
          ]
       },
       "sqlite": {
