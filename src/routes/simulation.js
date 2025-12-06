@@ -60,7 +60,7 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
     const customerData = req.body;
     
     // Calculate credit score
-    const { score, riskCategory } = calculateCreditScore(customerData);
+    const { score, riskCategory, factors, recommendations } = calculateCreditScore(customerData);
     
     // Prepare data for database
     const customerRecord = {
@@ -77,6 +77,8 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
       id: savedCustomer.id,
       score,
       riskCategory,
+      factors,
+      recommendations,
       message: 'Credit score calculated successfully',
       customer: {
         name: customerData.name,

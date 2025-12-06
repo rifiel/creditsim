@@ -5,6 +5,7 @@ class CreditSimulator {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
+        this.explanationCard = document.getElementById('explanationCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
@@ -172,7 +173,7 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskCategory, customer } = result;
+        const { score, riskCategory, customer, factors, recommendations } = result;
         
         // Update result card
         document.getElementById('scoreNumber').textContent = score;
@@ -189,6 +190,67 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+        
+        // Show explanation panel
+        this.showExplanation(score, riskCategory, factors, recommendations);
+    }
+    
+    showExplanation(score, riskCategory, factors, recommendations) {
+        // Update score and risk in explanation panel
+        document.getElementById('explainScoreNumber').textContent = score;
+        
+        const explainRiskBadge = document.getElementById('explainRiskBadge');
+        explainRiskBadge.textContent = riskCategory;
+        explainRiskBadge.className = `badge ${this.getRiskBadgeClass(riskCategory)}`;
+        
+        // Populate factors table
+        const factorsTableBody = document.getElementById('factorsTableBody');
+        factorsTableBody.innerHTML = '';
+        
+        if (factors && factors.length > 0) {
+            factors.forEach(factor => {
+                const row = document.createElement('tr');
+                
+                // Impact badge color
+                let impactBadge = '';
+                if (factor.impact === 'positive') {
+                    impactBadge = '<span class="badge bg-success">Positive</span>';
+                } else if (factor.impact === 'negative') {
+                    impactBadge = '<span class="badge bg-danger">Negative</span>';
+                } else {
+                    impactBadge = '<span class="badge bg-secondary">Neutral</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${this.escapeHtml(factor.name)}</td>
+                    <td>${impactBadge}</td>
+                    <td>${(factor.weight * 100).toFixed(0)}%</td>
+                    <td>${this.escapeHtml(factor.message)}</td>
+                `;
+                
+                factorsTableBody.appendChild(row);
+            });
+        }
+        
+        // Populate recommendations list
+        const recommendationsList = document.getElementById('recommendationsList');
+        if (recommendations && recommendations.length > 0) {
+            let recommendationsHtml = '<ul class="list-group list-group-flush">';
+            recommendations.forEach(rec => {
+                recommendationsHtml += `
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle text-success"></i> ${this.escapeHtml(rec)}
+                    </li>
+                `;
+            });
+            recommendationsHtml += '</ul>';
+            recommendationsList.innerHTML = recommendationsHtml;
+        } else {
+            recommendationsList.innerHTML = '<p class="text-muted">No specific recommendations at this time. Your credit profile is strong!</p>';
+        }
+        
+        // Show the explanation card
+        this.explanationCard.classList.remove('d-none');
     }
     
     showError(message) {
@@ -199,6 +261,7 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        this.explanationCard.classList.add('d-none');
     }
     
     showLoading() {

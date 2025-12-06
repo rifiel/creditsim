@@ -33,12 +33,27 @@ describe('API Endpoints', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('score');
       expect(response.body).toHaveProperty('riskCategory');
+      expect(response.body).toHaveProperty('factors');
+      expect(response.body).toHaveProperty('recommendations');
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('customer');
 
       expect(typeof response.body.score).toBe('number');
       expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskCategory);
       expect(response.body.customer.name).toBe('John Doe');
+      
+      // Validate factors structure
+      expect(Array.isArray(response.body.factors)).toBe(true);
+      expect(response.body.factors.length).toBeGreaterThan(0);
+      response.body.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+      });
+      
+      // Validate recommendations structure
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
     });
 
     test('should return 400 for missing required fields', async () => {
@@ -239,6 +254,100 @@ describe('API Endpoints', () => {
 
       expect(response.body).toHaveProperty('error');
       expect(response.body.error).toBe('Endpoint not found');
+    });
+  });
+
+  describe('Score Explanation Integration Tests', () => {
+    test('should return factors and recommendations for high-risk customer', async () => {
+      const highRiskCustomer = {
+        name: 'High Risk Customer',
+        age: 22,
+        annualIncome: 30000,
+        debtToIncomeRatio: 0.45,
+        loanAmount: 20000,
+        creditHistory: 'bad'
+      };
+
+      const response = await request(app)
+        .post('/api/simulate')
+        .send(highRiskCustomer)
+        .expect(201);
+
+      // Verify factors are returned
+      expect(response.body.factors).toBeDefined();
+      expect(Array.isArray(response.body.factors)).toBe(true);
+      expect(response.body.factors.length).toBeGreaterThan(0);
+
+      // Verify at least one negative factor exists
+      const negativeFactor = response.body.factors.find(f => f.impact === 'negative');
+      expect(negativeFactor).toBeDefined();
+
+      // Verify recommendations are returned
+      expect(response.body.recommendations).toBeDefined();
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
+      expect(response.body.recommendations.length).toBeGreaterThan(0);
+
+      // Verify the score is in high-risk range
+      expect(response.body.score).toBeLessThan(650);
+      expect(response.body.riskCategory).toBe('High risk');
+    });
+
+    test('should return factors and minimal recommendations for low-risk customer', async () => {
+      const lowRiskCustomer = {
+        name: 'Low Risk Customer',
+        age: 40,
+        annualIncome: 150000,
+        debtToIncomeRatio: 0.15,
+        loanAmount: 10000,
+        creditHistory: 'good'
+      };
+
+      const response = await request(app)
+        .post('/api/simulate')
+        .send(lowRiskCustomer)
+        .expect(201);
+
+      // Verify factors are returned
+      expect(response.body.factors).toBeDefined();
+      expect(Array.isArray(response.body.factors)).toBe(true);
+
+      // Verify most factors are positive
+      const positiveFactors = response.body.factors.filter(f => f.impact === 'positive');
+      expect(positiveFactors.length).toBeGreaterThan(0);
+
+      // Verify recommendations are returned (may be empty or minimal)
+      expect(response.body.recommendations).toBeDefined();
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
+
+      // Verify the score is in good range
+      expect(response.body.score).toBeGreaterThanOrEqual(650);
+    });
+
+    test('should include specific DTI recommendation when DTI is high', async () => {
+      const highDtiCustomer = {
+        name: 'High DTI Customer',
+        age: 35,
+        annualIncome: 60000,
+        debtToIncomeRatio: 0.5,
+        loanAmount: 15000,
+        creditHistory: 'good'
+      };
+
+      const response = await request(app)
+        .post('/api/simulate')
+        .send(highDtiCustomer)
+        .expect(201);
+
+      // Verify DTI recommendation is present
+      const dtiRecommendation = response.body.recommendations.find(r =>
+        r.toLowerCase().includes('debt-to-income')
+      );
+      expect(dtiRecommendation).toBeDefined();
+
+      // Verify DTI factor shows as negative
+      const dtiFactor = response.body.factors.find(f => f.name === 'Debt-to-Income Ratio');
+      expect(dtiFactor).toBeDefined();
+      expect(dtiFactor.impact).toBe('negative');
     });
   });
 });
