@@ -169,6 +169,53 @@
                         <div id="errorMessage"></div>
                     </div>
                 </div>
+                
+                <!-- Score Explanation Panel -->
+                <div id="explanationCard" class="card mt-3 d-none">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-lightbulb"></i> Score Explanation & Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Score Summary -->
+                        <div class="mb-3 text-center">
+                            <h6 class="text-muted">Credit Score Analysis</h6>
+                            <div class="d-flex justify-content-center align-items-center gap-3">
+                                <span id="explanationScore" class="h3 mb-0"></span>
+                                <span id="explanationRisk" class="badge"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Factors Table -->
+                        <h6 class="mt-4 mb-3">
+                            <i class="bi bi-bar-chart"></i> Contributing Factors
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Factor</th>
+                                        <th>Impact</th>
+                                        <th class="text-center">Weight</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="factorsTableBody">
+                                    <!-- Factors will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Recommendations -->
+                        <h6 class="mt-4 mb-3">
+                            <i class="bi bi-clipboard-check"></i> Recommendations
+                        </h6>
+                        <ul id="recommendationsList" class="list-group list-group-flush">
+                            <!-- Recommendations will be inserted here -->
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         

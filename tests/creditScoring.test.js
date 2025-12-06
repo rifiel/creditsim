@@ -15,8 +15,12 @@ describe('Credit Scoring Service', () => {
       
       expect(result).toHaveProperty('score');
       expect(result).toHaveProperty('riskCategory');
+      expect(result).toHaveProperty('factors');
+      expect(result).toHaveProperty('recommendations');
       expect(typeof result.score).toBe('number');
       expect(typeof result.riskCategory).toBe('string');
+      expect(Array.isArray(result.factors)).toBe(true);
+      expect(Array.isArray(result.recommendations)).toBe(true);
       
       // Base score (600) + income bonus (40) = 640
       // Note: loanAmount (25000) / annualIncome (60000) = 0.417 < 0.5, so no loan penalty
@@ -111,6 +115,114 @@ describe('Credit Scoring Service', () => {
       expect(result.score).toBeLessThanOrEqual(850);
       // Base (600) + income bonus (80) + low loan-to-income bonus (30) = 710
       expect(result.riskCategory).toBe('Medium risk');
+    });
+
+    describe('factors and recommendations', () => {
+      test('should include factors with required properties', () => {
+        const result = calculateCreditScore(baseCustomer);
+        
+        expect(Array.isArray(result.factors)).toBe(true);
+        expect(result.factors.length).toBeGreaterThan(0);
+        
+        result.factors.forEach(factor => {
+          expect(factor).toHaveProperty('name');
+          expect(factor).toHaveProperty('impact');
+          expect(factor).toHaveProperty('weight');
+          expect(factor).toHaveProperty('message');
+          expect(typeof factor.name).toBe('string');
+          expect(['positive', 'negative', 'neutral']).toContain(factor.impact);
+          expect(typeof factor.weight).toBe('number');
+          expect(factor.weight).toBeGreaterThanOrEqual(0);
+          expect(factor.weight).toBeLessThanOrEqual(1);
+          expect(typeof factor.message).toBe('string');
+        });
+      });
+
+      test('should mark high DTI as negative factor and include recommendation', () => {
+        const highDebtCustomer = { ...baseCustomer, debtToIncomeRatio: 0.5 };
+        const result = calculateCreditScore(highDebtCustomer);
+        
+        const dtiFactor = result.factors.find(f => f.name === 'Debt-to-Income Ratio');
+        expect(dtiFactor).toBeDefined();
+        expect(dtiFactor.impact).toBe('negative');
+        
+        const dtiRecommendation = result.recommendations.find(r => 
+          r.toLowerCase().includes('debt-to-income') || r.toLowerCase().includes('dti')
+        );
+        expect(dtiRecommendation).toBeDefined();
+      });
+
+      test('should mark bad credit history as negative and include recommendation', () => {
+        const badCreditCustomer = { ...baseCustomer, creditHistory: 'bad' };
+        const result = calculateCreditScore(badCreditCustomer);
+        
+        const creditFactor = result.factors.find(f => f.name === 'Credit History');
+        expect(creditFactor).toBeDefined();
+        expect(creditFactor.impact).toBe('negative');
+        
+        const creditRecommendation = result.recommendations.find(r => 
+          r.toLowerCase().includes('credit') || r.toLowerCase().includes('payment')
+        );
+        expect(creditRecommendation).toBeDefined();
+      });
+
+      test('should include recommendation to lower loan amount when ratio is high', () => {
+        const highLoanCustomer = { 
+          ...baseCustomer, 
+          annualIncome: 30000,
+          loanAmount: 20000 // 20000/30000 = 0.667 > 0.5
+        };
+        const result = calculateCreditScore(highLoanCustomer);
+        
+        const loanRecommendation = result.recommendations.find(r => 
+          r.toLowerCase().includes('loan amount')
+        );
+        expect(loanRecommendation).toBeDefined();
+      });
+
+      test('should include recommendation for low income customers', () => {
+        const lowIncomeCustomer = { ...baseCustomer, annualIncome: 30000 };
+        const result = calculateCreditScore(lowIncomeCustomer);
+        
+        const incomeFactor = result.factors.find(f => f.name === 'Annual Income');
+        expect(incomeFactor).toBeDefined();
+        expect(incomeFactor.impact).toBe('negative');
+        
+        const incomeRecommendation = result.recommendations.find(r => 
+          r.toLowerCase().includes('income')
+        );
+        expect(incomeRecommendation).toBeDefined();
+      });
+
+      test('should provide general recommendation for high risk scores', () => {
+        const highRiskCustomer = {
+          age: 22,
+          annualIncome: 30000,
+          debtToIncomeRatio: 0.6,
+          loanAmount: 20000,
+          creditHistory: 'bad'
+        };
+        
+        const result = calculateCreditScore(highRiskCustomer);
+        
+        expect(result.riskCategory).toBe('High risk');
+        expect(result.recommendations.length).toBeGreaterThan(0);
+      });
+
+      test('should provide positive feedback for good credit profiles', () => {
+        const goodCustomer = {
+          age: 35,
+          annualIncome: 200000,
+          debtToIncomeRatio: 0.1,
+          loanAmount: 10000,
+          creditHistory: 'good'
+        };
+        
+        const result = calculateCreditScore(goodCustomer);
+        
+        expect(result.recommendations.length).toBeGreaterThan(0);
+        // Should have at least one positive recommendation or no concerns
+      });
     });
   });
 

@@ -33,12 +33,31 @@ describe('API Endpoints', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('score');
       expect(response.body).toHaveProperty('riskCategory');
+      expect(response.body).toHaveProperty('factors');
+      expect(response.body).toHaveProperty('recommendations');
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('customer');
 
       expect(typeof response.body.score).toBe('number');
       expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskCategory);
       expect(response.body.customer.name).toBe('John Doe');
+      
+      // Verify factors structure
+      expect(Array.isArray(response.body.factors)).toBe(true);
+      expect(response.body.factors.length).toBeGreaterThan(0);
+      response.body.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+      });
+      
+      // Verify recommendations structure
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
+      expect(response.body.recommendations.length).toBeGreaterThan(0);
+      response.body.recommendations.forEach(rec => {
+        expect(typeof rec).toBe('string');
+      });
     });
 
     test('should return 400 for missing required fields', async () => {

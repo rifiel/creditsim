@@ -5,6 +5,7 @@ class CreditSimulator {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
+        this.explanationCard = document.getElementById('explanationCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
@@ -172,7 +173,7 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskCategory, customer } = result;
+        const { score, riskCategory, customer, factors, recommendations } = result;
         
         // Update result card
         document.getElementById('scoreNumber').textContent = score;
@@ -189,6 +190,80 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+        
+        // Show explanation panel with factors and recommendations
+        if (factors && recommendations) {
+            this.showExplanation(score, riskCategory, factors, recommendations);
+        }
+    }
+    
+    showExplanation(score, riskCategory, factors, recommendations) {
+        // Update explanation header
+        document.getElementById('explanationScore').textContent = score;
+        const explanationRiskBadge = document.getElementById('explanationRisk');
+        explanationRiskBadge.textContent = riskCategory;
+        explanationRiskBadge.className = `badge ${this.getRiskBadgeClass(riskCategory)}`;
+        
+        // Render factors table
+        const factorsTableBody = document.getElementById('factorsTableBody');
+        factorsTableBody.innerHTML = ''; // Clear previous data
+        
+        factors.forEach(factor => {
+            const row = document.createElement('tr');
+            
+            // Factor name
+            const nameCell = document.createElement('td');
+            nameCell.innerHTML = `<strong>${this.escapeHtml(factor.name)}</strong>`;
+            row.appendChild(nameCell);
+            
+            // Impact with icon
+            const impactCell = document.createElement('td');
+            const impactBadge = this.getImpactBadge(factor.impact);
+            impactCell.innerHTML = impactBadge;
+            row.appendChild(impactCell);
+            
+            // Weight as percentage
+            const weightCell = document.createElement('td');
+            weightCell.className = 'text-center';
+            const weightPercent = Math.round(factor.weight * 100);
+            weightCell.innerHTML = `<span class="badge bg-secondary">${weightPercent}%</span>`;
+            row.appendChild(weightCell);
+            
+            // Message
+            const messageCell = document.createElement('td');
+            messageCell.textContent = factor.message;
+            messageCell.className = 'small';
+            row.appendChild(messageCell);
+            
+            factorsTableBody.appendChild(row);
+        });
+        
+        // Render recommendations list
+        const recommendationsList = document.getElementById('recommendationsList');
+        recommendationsList.innerHTML = ''; // Clear previous data
+        
+        recommendations.forEach(recommendation => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.innerHTML = `<i class="bi bi-check-circle text-success me-2"></i>${this.escapeHtml(recommendation)}`;
+            recommendationsList.appendChild(listItem);
+        });
+        
+        // Show the explanation card
+        this.explanationCard.classList.remove('d-none');
+    }
+    
+    getImpactBadge(impact) {
+        switch (impact) {
+            case 'positive':
+                return '<span class="badge bg-success"><i class="bi bi-arrow-up"></i> Positive</span>';
+            case 'negative':
+                return '<span class="badge bg-danger"><i class="bi bi-arrow-down"></i> Negative</span>';
+            case 'neutral':
+                return '<span class="badge bg-secondary"><i class="bi bi-dash"></i> Neutral</span>';
+            default:
+                return '<span class="badge bg-secondary">Unknown</span>';
+        }
     }
     
     showError(message) {
@@ -199,6 +274,7 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        this.explanationCard.classList.add('d-none');
     }
     
     showLoading() {
