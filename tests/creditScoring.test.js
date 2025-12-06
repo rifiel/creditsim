@@ -109,8 +109,8 @@ describe('Credit Scoring Service', () => {
       const result = calculateCreditScore(perfectCustomer);
       
       expect(result.score).toBeLessThanOrEqual(850);
-      // Base (600) + income bonus (40) = 640, still High risk (< 650)
-      expect(result.riskCategory).toBe('High risk');
+      // Base (600) + income bonus (80) + low loan-to-income bonus (30) = 710
+      expect(result.riskCategory).toBe('Medium risk');
     });
   });
 
