@@ -72,11 +72,11 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
     // Save to database
     const savedCustomer = await database.insertCustomer(customerRecord);
     
-    // Return response with new fields - using riskLevel instead of riskCategory (inconsistency - code review issue)
+    // Return response with new fields
     res.status(201).json({
       id: savedCustomer.id,
       score,
-      riskLevel: riskCategory,  // Changed field name - code review issue
+      riskCategory: riskCategory,  // Keep consistent field name
       factors,
       recommendations,
       message: 'Credit score calculated successfully',

@@ -173,9 +173,9 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskLevel, customer, factors, recommendations } = result;
+        const { score, riskCategory, customer, factors, recommendations } = result;
         
-        // Update result card - using riskLevel from API response
+        // Update result card
         document.getElementById('scoreNumber').textContent = score;
         document.getElementById('customerName').textContent = `for ${customer.name}`;
         document.getElementById('resultLoanAmount').textContent = `$${customer.loanAmount.toLocaleString()}`;
@@ -183,11 +183,11 @@ class CreditSimulator {
         
         // Update risk category badge
         const riskBadge = document.getElementById('riskCategory');
-        riskBadge.textContent = riskLevel;
-        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskLevel)}`;
+        riskBadge.textContent = riskCategory;
+        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskCategory)}`;
         
         // Update card styling
-        this.resultCard.className = `card score-card ${this.getRiskClass(riskLevel)}`;
+        this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
         
@@ -196,18 +196,16 @@ class CreditSimulator {
     }
     
     showExplanation(factors, recommendations) {
-        // Populate factors table - inefficient DOM manipulation, code review issue
+        // Populate factors table using map and join for efficiency
         const factorsBody = document.getElementById('factorsTableBody');
         factorsBody.innerHTML = '';  // Clear previous content
         
-        // Using innerHTML concatenation in loop - code review issue
-        let tableHtml = '';
-        for (var i = 0; i < factors.length; i++) {  // Using var instead of let/const - code review issue
-            var factor = factors[i];  // Using var instead of const - code review issue
+        // Using map and join for efficient DOM building
+        const tableHtml = factors.map(factor => {
             const impactBadge = this.getImpactBadge(factor.impact);
             const weightPercent = Math.round(factor.weight * 100);
             
-            tableHtml += `
+            return `
                 <tr>
                     <td>${factor.name}</td>
                     <td>${impactBadge}</td>
@@ -215,19 +213,16 @@ class CreditSimulator {
                     <td><small>${factor.message}</small></td>
                 </tr>
             `;
-        }
+        }).join('');
         factorsBody.innerHTML = tableHtml;
         
-        // Populate recommendations list - inefficient DOM manipulation, code review issue
+        // Populate recommendations list using map and join for efficiency
         const recList = document.getElementById('recommendationsList');
         recList.innerHTML = '';  // Clear previous content
         
         if (recommendations && recommendations.length > 0) {
-            // Using innerHTML concatenation - code review issue
-            var listHtml = '';  // Using var instead of let - code review issue
-            for (let i = 0; i < recommendations.length; i++) {
-                listHtml += `<li>${recommendations[i]}</li>`;
-            }
+            // Using map and join for efficient DOM building
+            const listHtml = recommendations.map(rec => `<li>${rec}</li>`).join('');
             recList.innerHTML = listHtml;
         } else {
             recList.innerHTML = '<li class="text-muted">No specific recommendations at this time.</li>';
@@ -238,7 +233,7 @@ class CreditSimulator {
     }
     
     getImpactBadge(impact) {
-        // Missing switch statement default case - code review issue
+        // Switch statement with default case for unexpected values
         switch (impact) {
             case 'positive':
                 return '<span class="badge bg-success">Positive</span>';
@@ -246,6 +241,8 @@ class CreditSimulator {
                 return '<span class="badge bg-danger">Negative</span>';
             case 'neutral':
                 return '<span class="badge bg-secondary">Neutral</span>';
+            default:
+                return '<span class="badge bg-secondary">Unknown</span>';
         }
     }
     

@@ -32,12 +32,12 @@ describe('API Endpoints', () => {
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('score');
-      expect(response.body).toHaveProperty('riskLevel');
+      expect(response.body).toHaveProperty('riskCategory');
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('customer');
 
       expect(typeof response.body.score).toBe('number');
-      expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskLevel);
+      expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskCategory);
       expect(response.body.customer.name).toBe('John Doe');
     });
 
@@ -260,7 +260,7 @@ describe('API Endpoints', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('score');
-      expect(response.body).toHaveProperty('riskLevel');
+      expect(response.body).toHaveProperty('riskCategory');
       expect(response.body).toHaveProperty('factors');
       expect(response.body).toHaveProperty('recommendations');
 

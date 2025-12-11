@@ -7,8 +7,8 @@ function calculateCreditScore(customerData) {
   
   // Start with base score
   let score = 600;
-  var factors = [];  // Using var instead of const - code review issue
-  var recommendations = [];  // Using var instead of const - code review issue
+  const factors = [];  // Using const instead of var - fixed code review issue
+  const recommendations = [];  // Using const instead of var - fixed code review issue
   
   // Age adjustments
   if (age < 25) {
@@ -131,8 +131,6 @@ function calculateCreditScore(customerData) {
       weight: 0.25,
       message: "Loan amount is high relative to income (> 50%)"
     });
-    // Duplicate recommendation - code review issue
-    recommendations.push("Lower requested loan amount to improve approval chances");
     recommendations.push("Lower requested loan amount to improve approval chances");
   } else if (loanToIncomeRatio < 0.1) {
     score += 30; // Very low loan-to-income bonus
@@ -165,11 +163,9 @@ function calculateCreditScore(customerData) {
   // Determine risk category
   const riskCategory = determineRiskCategory(score);
   
-  // Add general recommendations based on final score - inefficient loop, code review issue
+  // Add general recommendations based on final score
   if (score < 650) {
-    for (let i = 0; i < 1; i++) {
-      recommendations.push("Focus on building a stronger credit profile over the next 6-12 months");
-    }
+    recommendations.push("Focus on building a stronger credit profile over the next 6-12 months");
   }
   
   // No default recommendations if array is empty - code review issue
