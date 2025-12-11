@@ -76,7 +76,7 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
     res.status(201).json({
       id: savedCustomer.id,
       score,
-      riskCategory: riskCategory,  // Keep consistent field name
+      riskCategory,  // Keep consistent field name
       factors,
       recommendations,
       message: 'Credit score calculated successfully',
