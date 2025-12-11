@@ -5,6 +5,7 @@ class CreditSimulator {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
+        this.explanationCard = document.getElementById('explanationCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
@@ -172,9 +173,9 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskCategory, customer } = result;
+        const { score, riskLevel, customer, factors, recommendations } = result;
         
-        // Update result card
+        // Update result card - using riskLevel from API response
         document.getElementById('scoreNumber').textContent = score;
         document.getElementById('customerName').textContent = `for ${customer.name}`;
         document.getElementById('resultLoanAmount').textContent = `$${customer.loanAmount.toLocaleString()}`;
@@ -182,13 +183,70 @@ class CreditSimulator {
         
         // Update risk category badge
         const riskBadge = document.getElementById('riskCategory');
-        riskBadge.textContent = riskCategory;
-        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskCategory)}`;
+        riskBadge.textContent = riskLevel;
+        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskLevel)}`;
         
         // Update card styling
-        this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
+        this.resultCard.className = `card score-card ${this.getRiskClass(riskLevel)}`;
         
         this.resultCard.classList.remove('d-none');
+        
+        // Show explanation panel with factors and recommendations
+        this.showExplanation(factors, recommendations);
+    }
+    
+    showExplanation(factors, recommendations) {
+        // Populate factors table - inefficient DOM manipulation, code review issue
+        const factorsBody = document.getElementById('factorsTableBody');
+        factorsBody.innerHTML = '';  // Clear previous content
+        
+        // Using innerHTML concatenation in loop - code review issue
+        let tableHtml = '';
+        for (var i = 0; i < factors.length; i++) {  // Using var instead of let/const - code review issue
+            var factor = factors[i];  // Using var instead of const - code review issue
+            const impactBadge = this.getImpactBadge(factor.impact);
+            const weightPercent = Math.round(factor.weight * 100);
+            
+            tableHtml += `
+                <tr>
+                    <td>${factor.name}</td>
+                    <td>${impactBadge}</td>
+                    <td>${weightPercent}%</td>
+                    <td><small>${factor.message}</small></td>
+                </tr>
+            `;
+        }
+        factorsBody.innerHTML = tableHtml;
+        
+        // Populate recommendations list - inefficient DOM manipulation, code review issue
+        const recList = document.getElementById('recommendationsList');
+        recList.innerHTML = '';  // Clear previous content
+        
+        if (recommendations && recommendations.length > 0) {
+            // Using innerHTML concatenation - code review issue
+            var listHtml = '';  // Using var instead of let - code review issue
+            for (let i = 0; i < recommendations.length; i++) {
+                listHtml += `<li>${recommendations[i]}</li>`;
+            }
+            recList.innerHTML = listHtml;
+        } else {
+            recList.innerHTML = '<li class="text-muted">No specific recommendations at this time.</li>';
+        }
+        
+        // Show the explanation card
+        this.explanationCard.classList.remove('d-none');
+    }
+    
+    getImpactBadge(impact) {
+        // Missing switch statement default case - code review issue
+        switch (impact) {
+            case 'positive':
+                return '<span class="badge bg-success">Positive</span>';
+            case 'negative':
+                return '<span class="badge bg-danger">Negative</span>';
+            case 'neutral':
+                return '<span class="badge bg-secondary">Neutral</span>';
+        }
     }
     
     showError(message) {
@@ -199,6 +257,7 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        this.explanationCard.classList.add('d-none');
     }
     
     showLoading() {

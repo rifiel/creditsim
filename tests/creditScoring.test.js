@@ -220,4 +220,94 @@ describe('Credit Scoring Service', () => {
       expect(criteria.adjustments).toHaveProperty('loanToIncomeRatio');
     });
   });
+  
+  // New tests for score explanation feature
+  describe('calculateCreditScore - Factors and Recommendations', () => {
+    const baseCustomer = {
+      age: 35,
+      annualIncome: 60000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 15000,
+      creditHistory: 'good'
+    };
+
+    test('should return factors array with explanation', () => {
+      const result = calculateCreditScore(baseCustomer);
+      
+      expect(result).toHaveProperty('factors');
+      expect(Array.isArray(result.factors)).toBe(true);
+      expect(result.factors.length).toBeGreaterThan(0);
+      
+      // Each factor should have required properties
+      result.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+        expect(['positive', 'negative', 'neutral']).toContain(factor.impact);
+      });
+    });
+
+    test('should return recommendations array', () => {
+      const result = calculateCreditScore(baseCustomer);
+      
+      expect(result).toHaveProperty('recommendations');
+      expect(Array.isArray(result.recommendations)).toBe(true);
+    });
+
+    test('should mark high DTI as negative factor and provide recommendation', () => {
+      const highDTICustomer = { ...baseCustomer, debtToIncomeRatio: 0.5 };
+      const result = calculateCreditScore(highDTICustomer);
+      
+      const dtiFactor = result.factors.find(f => f.name === 'Debt-to-Income Ratio');
+      expect(dtiFactor).toBeDefined();
+      expect(dtiFactor.impact).toBe('negative');
+      
+      // Should have recommendation about reducing DTI
+      const hasDTIRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('debt') || r.toLowerCase().includes('dti')
+      );
+      expect(hasDTIRecommendation).toBe(true);
+    });
+
+    test('should not suggest lowering loan for low loan amount and good credit', () => {
+      const goodCustomer = {
+        age: 35,
+        annualIncome: 100000,
+        debtToIncomeRatio: 0.2,
+        loanAmount: 5000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScore(goodCustomer);
+      
+      // Should not recommend lowering loan amount
+      const hasLoanRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('lower') && r.toLowerCase().includes('loan')
+      );
+      expect(hasLoanRecommendation).toBe(false);
+      
+      // Should not recommend fixing credit history
+      const hasCreditRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('payment history') || r.toLowerCase().includes('credit history')
+      );
+      expect(hasCreditRecommendation).toBe(false);
+    });
+
+    test('should provide bad credit history recommendation', () => {
+      const badCreditCustomer = { ...baseCustomer, creditHistory: 'bad' };
+      const result = calculateCreditScore(badCreditCustomer);
+      
+      const creditFactor = result.factors.find(f => f.name === 'Credit History');
+      expect(creditFactor).toBeDefined();
+      expect(creditFactor.impact).toBe('negative');
+      
+      // Should have recommendation about improving credit
+      const hasCreditRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('payment history') || r.toLowerCase().includes('credit')
+      );
+      expect(hasCreditRecommendation).toBe(true);
+    });
+  });
 });
+

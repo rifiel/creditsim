@@ -32,12 +32,12 @@ describe('API Endpoints', () => {
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('score');
-      expect(response.body).toHaveProperty('riskCategory');
+      expect(response.body).toHaveProperty('riskLevel');
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('customer');
 
       expect(typeof response.body.score).toBe('number');
-      expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskCategory);
+      expect(['Low risk', 'Medium risk', 'High risk']).toContain(response.body.riskLevel);
       expect(response.body.customer.name).toBe('John Doe');
     });
 
@@ -241,4 +241,45 @@ describe('API Endpoints', () => {
       expect(response.body.error).toBe('Endpoint not found');
     });
   });
+  
+  // Integration tests for score explanation feature
+  describe('POST /api/simulate - Score Explanation', () => {
+    const validCustomerData = {
+      name: 'Jane Smith',
+      age: 35,
+      annualIncome: 60000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 15000,
+      creditHistory: 'good'
+    };
+
+    test('should return factors and recommendations in response', async () => {
+      const response = await request(app)
+        .post('/api/simulate')
+        .send(validCustomerData)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('score');
+      expect(response.body).toHaveProperty('riskLevel');
+      expect(response.body).toHaveProperty('factors');
+      expect(response.body).toHaveProperty('recommendations');
+
+      // Validate factors structure
+      expect(Array.isArray(response.body.factors)).toBe(true);
+      expect(response.body.factors.length).toBeGreaterThan(0);
+      
+      response.body.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+        expect(['positive', 'negative', 'neutral']).toContain(factor.impact);
+        expect(typeof factor.weight).toBe('number');
+      });
+
+      // Validate recommendations structure
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
+    });
+  });
 });
+
