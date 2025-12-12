@@ -5,6 +5,7 @@ class CreditSimulator {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
+        this.explanationCard = document.getElementById('explanationCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
@@ -172,7 +173,7 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskCategory, customer } = result;
+        const { score, riskCategory, customer, factors, recommendations } = result;
         
         // Update result card
         document.getElementById('scoreNumber').textContent = score;
@@ -189,6 +190,80 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+        
+        // Show explanation panel with factors and recommendations
+        this.showExplanation(factors, recommendations);
+    }
+    
+    showExplanation(factors, recommendations) {
+        // Clear previous content
+        const factorsTableBody = document.getElementById('factorsTableBody');
+        const recommendationsList = document.getElementById('recommendationsList');
+        
+        factorsTableBody.innerHTML = '';
+        recommendationsList.innerHTML = '';
+        
+        // Populate factors table
+        if (factors && factors.length > 0) {
+            factors.forEach(factor => {
+                const row = document.createElement('tr');
+                
+                // Factor name
+                const nameCell = document.createElement('td');
+                nameCell.textContent = factor.name;
+                row.appendChild(nameCell);
+                
+                // Impact
+                const impactCell = document.createElement('td');
+                const impactBadge = document.createElement('span');
+                impactBadge.classList.add('badge');
+                
+                if (factor.impact === 'positive') {
+                    impactBadge.classList.add('bg-success');
+                    impactBadge.innerHTML = '<i class="bi bi-arrow-up"></i> Positive';
+                } else if (factor.impact === 'negative') {
+                    impactBadge.classList.add('bg-danger');
+                    impactBadge.innerHTML = '<i class="bi bi-arrow-down"></i> Negative';
+                } else {
+                    impactBadge.classList.add('bg-secondary');
+                    impactBadge.innerHTML = '<i class="bi bi-dash"></i> Neutral';
+                }
+                
+                impactCell.appendChild(impactBadge);
+                row.appendChild(impactCell);
+                
+                // Weight
+                const weightCell = document.createElement('td');
+                weightCell.textContent = `${(factor.weight * 100).toFixed(0)}%`;
+                row.appendChild(weightCell);
+                
+                // Message
+                const messageCell = document.createElement('td');
+                messageCell.textContent = factor.message;
+                messageCell.classList.add('text-muted', 'small');
+                row.appendChild(messageCell);
+                
+                factorsTableBody.appendChild(row);
+            });
+        }
+        
+        // Populate recommendations list
+        if (recommendations && recommendations.length > 0) {
+            recommendations.forEach(rec => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item');
+                listItem.innerHTML = `<i class="bi bi-check-circle text-primary"></i> ${rec}`;
+                recommendationsList.appendChild(listItem);
+            });
+        } else {
+            const listItem = document.createElement('li');
+            listItem.classList.add('list-group-item', 'text-muted');
+            listItem.textContent = 'No specific recommendations at this time. Your credit profile looks good!';
+            recommendationsList.appendChild(listItem);
+        }
+        
+        // Show the explanation card
+        this.explanationCard.classList.remove('d-none');
     }
     
     showError(message) {
@@ -199,6 +274,7 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        this.explanationCard.classList.add('d-none');
     }
     
     showLoading() {

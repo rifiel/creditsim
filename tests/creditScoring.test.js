@@ -15,8 +15,12 @@ describe('Credit Scoring Service', () => {
       
       expect(result).toHaveProperty('score');
       expect(result).toHaveProperty('riskCategory');
+      expect(result).toHaveProperty('factors');
+      expect(result).toHaveProperty('recommendations');
       expect(typeof result.score).toBe('number');
       expect(typeof result.riskCategory).toBe('string');
+      expect(Array.isArray(result.factors)).toBe(true);
+      expect(Array.isArray(result.recommendations)).toBe(true);
       
       // Base score (600) + income bonus (40) = 640
       // Note: loanAmount (25000) / annualIncome (60000) = 0.417 < 0.5, so no loan penalty
@@ -218,6 +222,102 @@ describe('Credit Scoring Service', () => {
       expect(criteria.adjustments).toHaveProperty('debtToIncomeRatio');
       expect(criteria.adjustments).toHaveProperty('creditHistory');
       expect(criteria.adjustments).toHaveProperty('loanToIncomeRatio');
+    });
+  });
+
+  describe('factors and recommendations', () => {
+    test('should include negative factor and recommendation for high DTI', () => {
+      const highDTICustomer = {
+        age: 35,
+        annualIncome: 60000,
+        debtToIncomeRatio: 0.5,
+        loanAmount: 15000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScore(highDTICustomer);
+      
+      expect(result.factors).toBeDefined();
+      const dtiFactors = result.factors.filter(f => f.name === 'Debt-to-Income Ratio');
+      expect(dtiFactors.length).toBeGreaterThan(0);
+      expect(dtiFactors[0].impact).toBe('negative');
+      
+      expect(result.recommendations).toBeDefined();
+      const dtiRecommendations = result.recommendations.filter(r => r.includes('debt-to-income'));
+      expect(dtiRecommendations.length).toBeGreaterThan(0);
+    });
+
+    test('should include negative factor and recommendation for bad credit history', () => {
+      const badCreditCustomer = {
+        age: 35,
+        annualIncome: 60000,
+        debtToIncomeRatio: 0.3,
+        loanAmount: 15000,
+        creditHistory: 'bad'
+      };
+      
+      const result = calculateCreditScore(badCreditCustomer);
+      
+      const creditFactors = result.factors.filter(f => f.name === 'Credit History');
+      expect(creditFactors.length).toBeGreaterThan(0);
+      expect(creditFactors[0].impact).toBe('negative');
+      
+      const creditRecommendations = result.recommendations.filter(r => r.includes('payment history'));
+      expect(creditRecommendations.length).toBeGreaterThan(0);
+    });
+
+    test('should include recommendation for high loan amount', () => {
+      const highLoanCustomer = {
+        age: 35,
+        annualIncome: 30000,
+        debtToIncomeRatio: 0.3,
+        loanAmount: 20000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScore(highLoanCustomer);
+      
+      const loanRecommendations = result.recommendations.filter(r => r.includes('loan amount'));
+      expect(loanRecommendations.length).toBeGreaterThan(0);
+    });
+
+    test('should have no recommendations for good credit profile', () => {
+      const goodCustomer = {
+        age: 35,
+        annualIncome: 100000,
+        debtToIncomeRatio: 0.2,
+        loanAmount: 10000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScore(goodCustomer);
+      
+      // Should have minimal or no recommendations
+      expect(result.recommendations).toBeDefined();
+      expect(Array.isArray(result.recommendations)).toBe(true);
+    });
+
+    test('should ensure all factors have required properties', () => {
+      const customer = {
+        age: 35,
+        annualIncome: 60000,
+        debtToIncomeRatio: 0.3,
+        loanAmount: 15000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScore(customer);
+      
+      result.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+        expect(['positive', 'negative', 'neutral']).toContain(factor.impact);
+        expect(typeof factor.weight).toBe('number');
+        expect(factor.weight).toBeGreaterThanOrEqual(0);
+        expect(factor.weight).toBeLessThanOrEqual(1);
+      });
     });
   });
 });

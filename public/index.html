@@ -159,6 +159,41 @@
                     </div>
                 </div>
                 
+                <!-- Score Explanation Panel -->
+                <div id="explanationCard" class="card mt-3 d-none">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-lightbulb"></i> Score Explanation & Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Key Factors</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm" id="factorsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Factor</th>
+                                            <th>Impact</th>
+                                            <th>Weight</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="factorsTableBody">
+                                        <!-- Factors will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="text-muted">Recommendations</h6>
+                            <ul id="recommendationsList" class="list-group list-group-flush">
+                                <!-- Recommendations will be inserted here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="errorCard" class="card border-danger d-none">
                     <div class="card-header bg-danger text-white">
                         <h5 class="card-title mb-0">
