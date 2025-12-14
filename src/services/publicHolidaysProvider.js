@@ -108,11 +108,13 @@ class PublicHolidaysProvider {
    * Get public holidays for a specific country and year
    * @param {string} country - ISO 3166-1 alpha-2 country code
    * @param {number} year - Year (1900-2100)
-   * @param {boolean} observed - Include observed flag (not used by Nager.Date)
+   * @param {boolean} observed - Include observed flag (reserved for future use; not currently used by Nager.Date API)
    * @returns {Promise<Object>} - Holidays data
    */
   async getHolidays(country, year, observed = false) {
     try {
+      // Note: 'observed' parameter is accepted for API compatibility but not currently used
+      // as the Nager.Date API does not support filtering by observed status
       const cacheKey = `holidays:${country}:${year}`;
       
       return await this.getCached(cacheKey, async () => {
