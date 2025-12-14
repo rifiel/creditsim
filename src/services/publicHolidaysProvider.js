@@ -26,11 +26,7 @@ class PublicHolidaysProvider {
     return new Promise((resolve, reject) => {
       const url = `${this.baseUrl}${path}`;
       
-      const timeoutId = setTimeout(() => {
-        reject(new Error('Request timeout'));
-      }, this.timeout);
-
-      https.get(url, (res) => {
+      const request = https.get(url, (res) => {
         let data = '';
 
         res.on('data', (chunk) => {
@@ -57,6 +53,11 @@ class PublicHolidaysProvider {
         clearTimeout(timeoutId);
         reject(error);
       });
+
+      const timeoutId = setTimeout(() => {
+        request.destroy();
+        reject(new Error('Request timeout'));
+      }, this.timeout);
     });
   }
 
