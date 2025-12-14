@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const path = require('path');
 const { initializeDatabase } = require('./database/database');
 const simulationRoutes = require('./routes/simulation');
+const publicHolidaysRoutes = require('./routes/publicHolidays');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,10 +33,16 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/api', simulationRoutes);
+app.use('/api/public-holidays', publicHolidaysRoutes);
 
 // Serve the HTML form at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Serve the public holidays page
+app.get('/public-holidays', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/public-holidays.html'));
 });
 
 // Global error handler

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Holidays - Credit Risk Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .holiday-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-calculator"></i> Credit Risk Simulator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/public-holidays">
+                            <i class="bi bi-calendar-event"></i> Public Holidays
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-calendar-event"></i> Public Holidays
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Controls Section -->
+                        <form id="holidaysForm" class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="countrySelect" class="form-label">Country</label>
+                                <select class="form-select" id="countrySelect" name="country" required>
+                                    <option value="">Loading countries...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="yearInput" class="form-label">Year</label>
+                                <input type="number" class="form-control" id="yearInput" name="year" 
+                                       min="1900" max="2100" required>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100" id="loadBtn">
+                                    <i class="bi bi-search"></i> Load Holidays
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Alert placeholder -->
+                        <div id="alertPlaceholder"></div>
+
+                        <!-- Results Section -->
+                        <div id="resultsSection">
+                            <!-- Loading state -->
+                            <div id="loadingState" class="text-center py-5 d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading holidays...</p>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div id="emptyState" class="text-center py-5 d-none">
+                                <i class="bi bi-inbox display-1 text-muted"></i>
+                                <p class="mt-2 text-muted">No holidays found for the selected country and year.</p>
+                            </div>
+
+                            <!-- Table -->
+                            <div id="tableContainer" class="d-none">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Local Name</th>
+                                                <th scope="col">Type</th>
+                                                <th scope="col">Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="holidaysTableBody">
+                                            <!-- Rows will be inserted here by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        Total: <span id="holidayCount">0</span> holidays
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <small>
+                <i class="bi bi-info-circle"></i> 
+                Public holiday data provided by Nager.Date API
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="js/public-holidays.js"></script>
+</body>
+</html>
