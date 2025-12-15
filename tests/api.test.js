@@ -231,6 +231,16 @@ describe('API Endpoints', () => {
     });
   });
 
+  describe('GET /blank', () => {
+    test('should serve the blank page', async () => {
+      const response = await request(app)
+        .get('/blank')
+        .expect(200);
+
+      expect(response.headers['content-type']).toMatch(/text\/html/);
+    });
+  });
+
   describe('404 handling', () => {
     test('should return 404 for non-existent endpoints', async () => {
       const response = await request(app)
