@@ -52,10 +52,20 @@
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
                 <i class="bi bi-calculator"></i> Credit Risk Simulator
             </a>
-            <span class="navbar-text">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/terms">Terms</a>
+                    </li>
+                </ul>
+            </div>
+            <span class="navbar-text d-none d-lg-block ms-3">
                 Demo Application - Not for Production Use
             </span>
         </div>
@@ -198,10 +208,20 @@
 
     <footer class="bg-dark text-light text-center py-3 mt-5">
         <div class="container">
-            <small>
-                <i class="bi bi-info-circle"></i> 
-                This is a demonstration application. Do not use for actual credit decisions.
-            </small>
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <a href="/terms" class="text-light text-decoration-none me-3">Terms & Conditions</a>
+                    <a href="https://github.com/mooncowboy/creditsim" target="_blank" rel="noopener noreferrer" class="text-light text-decoration-none">
+                        <i class="bi bi-github"></i> GitHub
+                    </a>
+                </div>
+                <div class="col-12">
+                    <small>
+                        <i class="bi bi-info-circle"></i> 
+                        This is a demonstration application. Do not use for actual credit decisions.
+                    </small>
+                </div>
+            </div>
         </div>
     </footer>
 
