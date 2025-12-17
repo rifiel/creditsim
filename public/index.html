@@ -159,6 +159,42 @@
                     </div>
                 </div>
                 
+                <!-- Score Explanation Panel -->
+                <div id="explanationCard" class="card mt-3 d-none">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-lightbulb"></i> Score Explanation & Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Key Factors</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Factor</th>
+                                            <th>Impact</th>
+                                            <th>Weight</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="factorsTable">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div id="recommendationsSection">
+                            <h6><i class="bi bi-arrow-up-circle"></i> Recommendations</h6>
+                            <ul id="recommendationsList" class="list-group list-group-flush">
+                                <!-- Populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="errorCard" class="card border-danger d-none">
                     <div class="card-header bg-danger text-white">
                         <h5 class="card-title mb-0">

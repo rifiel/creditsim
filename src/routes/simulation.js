@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
 const { database } = require('../database/database');
-const { calculateCreditScore, getScoringCriteria } = require('../services/creditScoring');
+const { calculateCreditScore, calculateCreditScoreWithExplanation, getScoringCriteria } = require('../services/creditScoring');
 
 const router = express.Router();
 
@@ -59,8 +59,8 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
   try {
     const customerData = req.body;
     
-    // Calculate credit score
-    const { score, riskCategory } = calculateCreditScore(customerData);
+    // Calculate credit score with explanation
+    const { score, riskCategory, factors, recommendations } = calculateCreditScoreWithExplanation(customerData);
     
     // Prepare data for database
     const customerRecord = {
@@ -72,11 +72,13 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
     // Save to database
     const savedCustomer = await database.insertCustomer(customerRecord);
     
-    // Return response
+    // Return response with factors and recommendations
     res.status(201).json({
       id: savedCustomer.id,
       score,
       riskCategory,
+      factors,
+      recommendations,
       message: 'Credit score calculated successfully',
       customer: {
         name: customerData.name,

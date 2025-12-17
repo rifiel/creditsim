@@ -5,6 +5,7 @@ class CreditSimulator {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
+        this.explanationCard = document.getElementById('explanationCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
@@ -172,7 +173,7 @@ class CreditSimulator {
     }
     
     showResult(result) {
-        const { score, riskCategory, customer } = result;
+        const { score, riskCategory, customer, factors, recommendations } = result;
         
         // Update result card
         document.getElementById('scoreNumber').textContent = score;
@@ -189,6 +190,60 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+        
+        // Show explanation panel
+        this.showExplanation(factors, recommendations);
+    }
+    
+    showExplanation(factors, recommendations) {
+        // Populate factors table
+        const factorsTable = document.getElementById('factorsTable');
+        factorsTable.innerHTML = '';
+        
+        for (let i = 0; i < factors.length; i++) {
+            const factor = factors[i];
+            const row = document.createElement('tr');
+            
+            // Determine impact badge class
+            let impactBadge = '';
+            if (factor.impact === 'positive') {
+                impactBadge = '<span class="badge bg-success">Positive</span>';
+            } else if (factor.impact === 'negative') {
+                impactBadge = '<span class="badge bg-danger">Negative</span>';
+            } else {
+                impactBadge = '<span class="badge bg-secondary">Neutral</span>';
+            }
+            
+            // Calculate weight percentage
+            const weightPercent = (factor.weight * 100).toFixed(0) + '%';
+            
+            row.innerHTML = `
+                <td>${factor.name}</td>
+                <td>${impactBadge}</td>
+                <td>${weightPercent}</td>
+                <td><small>${factor.message}</small></td>
+            `;
+            
+            factorsTable.appendChild(row);
+        }
+        
+        // Populate recommendations list
+        const recommendationsList = document.getElementById('recommendationsList');
+        recommendationsList.innerHTML = '';
+        
+        if (recommendations.length === 0) {
+            recommendationsList.innerHTML = '<li class="list-group-item">No specific recommendations - your profile looks good!</li>';
+        } else {
+            recommendations.forEach(function(rec) {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `<i class="bi bi-check-circle text-success"></i> ${rec}`;
+                recommendationsList.appendChild(listItem);
+            });
+        }
+        
+        // Show the explanation card
+        this.explanationCard.classList.remove('d-none');
     }
     
     showError(message) {
@@ -199,6 +254,7 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        this.explanationCard.classList.add('d-none');
     }
     
     showLoading() {

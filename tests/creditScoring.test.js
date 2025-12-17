@@ -1,4 +1,4 @@
-const { calculateCreditScore, determineRiskCategory, validateCustomerData, getScoringCriteria } = require('../src/services/creditScoring');
+const { calculateCreditScore, calculateCreditScoreWithExplanation, determineRiskCategory, validateCustomerData, getScoringCriteria } = require('../src/services/creditScoring');
 
 describe('Credit Scoring Service', () => {
   describe('calculateCreditScore', () => {
@@ -218,6 +218,95 @@ describe('Credit Scoring Service', () => {
       expect(criteria.adjustments).toHaveProperty('debtToIncomeRatio');
       expect(criteria.adjustments).toHaveProperty('creditHistory');
       expect(criteria.adjustments).toHaveProperty('loanToIncomeRatio');
+    });
+  });
+
+  describe('calculateCreditScoreWithExplanation', () => {
+    const baseCustomer = {
+      age: 35,
+      annualIncome: 60000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 25000,
+      creditHistory: 'good'
+    };
+
+    test('should return score with factors and recommendations', () => {
+      const result = calculateCreditScoreWithExplanation(baseCustomer);
+      
+      expect(result).toHaveProperty('score');
+      expect(result).toHaveProperty('riskCategory');
+      expect(result).toHaveProperty('factors');
+      expect(result).toHaveProperty('recommendations');
+      
+      expect(Array.isArray(result.factors)).toBe(true);
+      expect(Array.isArray(result.recommendations)).toBe(true);
+      expect(result.factors.length).toBeGreaterThan(0);
+    });
+
+    test('should mark DTI factor as negative when ratio > 0.4', () => {
+      const highDtiCustomer = { ...baseCustomer, debtToIncomeRatio: 0.5 };
+      const result = calculateCreditScoreWithExplanation(highDtiCustomer);
+      
+      const dtiFactor = result.factors.find(f => f.name === 'Debt-to-Income Ratio');
+      expect(dtiFactor).toBeDefined();
+      expect(dtiFactor.impact).toBe('negative');
+      
+      // Should include recommendation about reducing DTI
+      const hasDtiRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('debt-to-income')
+      );
+      expect(hasDtiRecommendation).toBe(true);
+    });
+
+    test('should not suggest lowering loan for low loan amount and good credit', () => {
+      const goodCustomer = {
+        age: 35,
+        annualIncome: 100000,
+        debtToIncomeRatio: 0.2,
+        loanAmount: 15000,
+        creditHistory: 'good'
+      };
+      
+      const result = calculateCreditScoreWithExplanation(goodCustomer);
+      
+      // Should not recommend lowering loan amount
+      const hasLoanRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('lower') && r.toLowerCase().includes('loan')
+      );
+      expect(hasLoanRecommendation).toBe(false);
+    });
+
+    test('should include credit history recommendation for bad credit', () => {
+      const badCreditCustomer = { ...baseCustomer, creditHistory: 'bad' };
+      const result = calculateCreditScoreWithExplanation(badCreditCustomer);
+      
+      const historyFactor = result.factors.find(f => f.name === 'Credit History');
+      expect(historyFactor).toBeDefined();
+      expect(historyFactor.impact).toBe('negative');
+      
+      // Should include recommendation about improving payment history
+      const hasHistoryRecommendation = result.recommendations.some(r => 
+        r.toLowerCase().includes('payment history') || r.toLowerCase().includes('credit history')
+      );
+      expect(hasHistoryRecommendation).toBe(true);
+    });
+
+    test('should include factor weights and messages', () => {
+      const result = calculateCreditScoreWithExplanation(baseCustomer);
+      
+      result.factors.forEach(factor => {
+        expect(factor).toHaveProperty('name');
+        expect(factor).toHaveProperty('impact');
+        expect(factor).toHaveProperty('weight');
+        expect(factor).toHaveProperty('message');
+        
+        expect(typeof factor.name).toBe('string');
+        expect(['positive', 'negative', 'neutral']).toContain(factor.impact);
+        expect(typeof factor.weight).toBe('number');
+        expect(factor.weight).toBeGreaterThanOrEqual(0);
+        expect(factor.weight).toBeLessThanOrEqual(1);
+        expect(typeof factor.message).toBe('string');
+      });
     });
   });
 });
