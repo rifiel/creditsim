@@ -12,6 +12,7 @@ A lightweight Node.js web application that calculates simulated credit risk scor
 - **SQLite Database**: Lightweight persistence for simulation history
 - **Comprehensive Testing**: Unit and integration tests with Jest
 - **Responsive Design**: Mobile-friendly interface
+- **Terms & Conditions**: Public Terms & Conditions page with structured sections and configurable effective date
 
 ## Quick Start
 
@@ -291,6 +292,8 @@ The application uses the following optional environment variables:
 
 - `PORT`: Server port (default: 3000)
 - `NODE_ENV`: Environment mode (development/production)
+- `TERMS_EFFECTIVE_DATE`: Effective date for Terms & Conditions (default: 2025-12-01)
+- `TERMS_UPDATE_NOTICE`: Optional update notice for Terms & Conditions (default: empty)
 
 ## Security Considerations
 

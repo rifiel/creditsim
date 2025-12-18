@@ -14,7 +14,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://cdn.jsdelivr.net"]
     }
   }
@@ -36,6 +36,24 @@ app.use('/api', simulationRoutes);
 // Serve the HTML form at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Serve Terms & Conditions page
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/terms.html'));
+});
+
+// Serve Terms & Conditions page (alias with redirect)
+app.get('/terms-and-conditions', (req, res) => {
+  res.redirect(301, '/terms');
+});
+
+// API endpoint for terms metadata
+app.get('/api/terms-metadata', (req, res) => {
+  res.json({
+    effectiveDate: process.env.TERMS_EFFECTIVE_DATE || '2025-12-01',
+    updateNotice: process.env.TERMS_UPDATE_NOTICE || ''
+  });
 });
 
 // Global error handler
