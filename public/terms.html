@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms &amp; Conditions - Credit Risk Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .terms-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        .effective-date {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .update-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .section-heading {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #dee2e6;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-calculator"></i> Credit Risk Simulator
+            </a>
+            <span class="navbar-text">
+                Demo Application - Not for Production Use
+            </span>
+        </div>
+    </nav>
+
+    <div class="terms-header">
+        <div class="container">
+            <h1 class="display-4"><i class="bi bi-file-text"></i> Terms &amp; Conditions</h1>
+            <p class="lead">Please read these terms carefully before using our service</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <!-- Effective Date -->
+                        <div class="effective-date" role="status">
+                            <p class="mb-0">
+                                <strong><i class="bi bi-calendar-check"></i> Effective date:</strong> 
+                                <span id="effectiveDate">Loading...</span>
+                            </p>
+                        </div>
+
+                        <!-- Update Notice (conditional) -->
+                        <div id="updateNoticeContainer" class="update-notice d-none" role="status">
+                            <p class="mb-0">
+                                <strong><i class="bi bi-info-circle"></i> Update notice:</strong> 
+                                <span id="updateNotice"></span>
+                            </p>
+                        </div>
+
+                        <!-- Introduction -->
+                        <p class="lead">
+                            Welcome to Credit Risk Simulator. By accessing or using this demonstration application, 
+                            you agree to be bound by these Terms and Conditions. If you do not agree to these terms, 
+                            please do not use this service.
+                        </p>
+
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>Important:</strong> This is a demonstration application for educational purposes only. 
+                            Do not use for actual credit decisions or in production environments.
+                        </div>
+
+                        <!-- Eligibility Section -->
+                        <h2 id="eligibility" class="section-heading">
+                            <i class="bi bi-person-check"></i> Eligibility
+                        </h2>
+                        <p>
+                            To use this service, you must:
+                        </p>
+                        <ul>
+                            <li>Be at least 18 years of age or the age of legal majority in your jurisdiction</li>
+                            <li>Have the legal capacity to enter into binding agreements</li>
+                            <li>Use the service only for demonstration and educational purposes</li>
+                            <li>Not use the service for any commercial or production purposes</li>
+                        </ul>
+                        <p>
+                            By using this service, you represent and warrant that you meet these eligibility requirements.
+                        </p>
+
+                        <!-- Acceptable Use Section -->
+                        <h2 id="acceptable-use" class="section-heading">
+                            <i class="bi bi-shield-check"></i> Acceptable Use
+                        </h2>
+                        <p>
+                            When using this service, you agree to:
+                        </p>
+                        <ul>
+                            <li>Use the service only for lawful purposes and in accordance with these terms</li>
+                            <li>Not enter real personal or financial information</li>
+                            <li>Not attempt to reverse engineer, decompile, or disassemble any part of the service</li>
+                            <li>Not use automated systems or bots to access the service</li>
+                            <li>Not interfere with or disrupt the service or servers</li>
+                            <li>Not attempt to gain unauthorized access to any portion of the service</li>
+                            <li>Not use the service to transmit any viruses, malware, or other malicious code</li>
+                        </ul>
+                        <p>
+                            We reserve the right to terminate or restrict your access to the service if you violate 
+                            these acceptable use terms.
+                        </p>
+
+                        <!-- Payments Section -->
+                        <h2 id="payments" class="section-heading">
+                            <i class="bi bi-credit-card"></i> Payments
+                        </h2>
+                        <p>
+                            This service is currently provided free of charge for demonstration purposes. 
+                            We reserve the right to:
+                        </p>
+                        <ul>
+                            <li>Introduce fees or charges for the service with advance notice</li>
+                            <li>Modify pricing or payment terms at any time</li>
+                            <li>Offer different pricing tiers or subscription plans in the future</li>
+                        </ul>
+                        <p>
+                            If fees are introduced, you will be notified and given the opportunity to accept the new 
+                            terms or discontinue using the service. Continued use of the service after fee implementation 
+                            constitutes acceptance of the new payment terms.
+                        </p>
+                        <p>
+                            <strong>No Real Financial Transactions:</strong> This demonstration application does not 
+                            process real financial transactions or credit applications. Any monetary values displayed 
+                            are simulated for demonstration purposes only.
+                        </p>
+
+                        <!-- Termination Section -->
+                        <h2 id="termination" class="section-heading">
+                            <i class="bi bi-x-circle"></i> Termination
+                        </h2>
+                        <p>
+                            We may terminate or suspend your access to the service immediately, without prior notice 
+                            or liability, for any reason, including but not limited to:
+                        </p>
+                        <ul>
+                            <li>Breach of these Terms and Conditions</li>
+                            <li>Violation of applicable laws or regulations</li>
+                            <li>Fraudulent, abusive, or illegal activity</li>
+                            <li>Extended periods of inactivity</li>
+                            <li>At our sole discretion for any reason</li>
+                        </ul>
+                        <p>
+                            You may also terminate your use of the service at any time by simply discontinuing access. 
+                            Upon termination, your right to use the service will immediately cease.
+                        </p>
+                        <p>
+                            <strong>Effect of Termination:</strong> All provisions of these Terms which by their nature 
+                            should survive termination shall survive, including ownership provisions, warranty disclaimers, 
+                            and limitations of liability.
+                        </p>
+
+                        <!-- Liability Section -->
+                        <h2 id="liability" class="section-heading">
+                            <i class="bi bi-exclamation-triangle"></i> Liability
+                        </h2>
+                        <p>
+                            <strong>Disclaimer of Warranties:</strong> This service is provided "AS IS" and "AS AVAILABLE" 
+                            without any warranties of any kind, either express or implied, including but not limited to 
+                            warranties of merchantability, fitness for a particular purpose, or non-infringement.
+                        </p>
+                        <p>
+                            <strong>No Credit Decisions:</strong> The credit scores and risk assessments generated by 
+                            this service are simulated and for demonstration purposes only. They are not actual credit 
+                            scores and must not be used to make real credit, lending, or financial decisions.
+                        </p>
+                        <p>
+                            <strong>Limitation of Liability:</strong> To the maximum extent permitted by law, in no event 
+                            shall we be liable for any indirect, incidental, special, consequential, or punitive damages, 
+                            including but not limited to:
+                        </p>
+                        <ul>
+                            <li>Loss of profits or revenue</li>
+                            <li>Loss of data or information</li>
+                            <li>Business interruption</li>
+                            <li>Loss of goodwill or reputation</li>
+                            <li>Any other commercial damages or losses</li>
+                        </ul>
+                        <p>
+                            This limitation applies whether the liability is based on contract, tort (including negligence), 
+                            strict liability, or any other legal theory, even if we have been advised of the possibility 
+                            of such damages.
+                        </p>
+                        <p>
+                            <strong>Indemnification:</strong> You agree to indemnify, defend, and hold harmless the 
+                            service, its operators, and affiliates from any claims, damages, losses, or expenses 
+                            (including reasonable attorneys' fees) arising out of your use of the service or violation 
+                            of these terms.
+                        </p>
+
+                        <!-- Additional Sections -->
+                        <h2 class="section-heading">
+                            <i class="bi bi-gear"></i> Changes to Terms
+                        </h2>
+                        <p>
+                            We reserve the right to modify these Terms and Conditions at any time. Changes will be 
+                            effective immediately upon posting to this page with an updated effective date. Your 
+                            continued use of the service after changes are posted constitutes acceptance of the 
+                            modified terms.
+                        </p>
+
+                        <h2 class="section-heading">
+                            <i class="bi bi-globe"></i> Governing Law
+                        </h2>
+                        <p>
+                            These Terms and Conditions shall be governed by and construed in accordance with applicable 
+                            laws, without regard to conflict of law principles. Any disputes arising from these terms 
+                            or your use of the service shall be resolved in accordance with applicable jurisdiction.
+                        </p>
+
+                        <h2 class="section-heading">
+                            <i class="bi bi-envelope"></i> Contact Information
+                        </h2>
+                        <p>
+                            If you have any questions about these Terms and Conditions, please contact us through 
+                            the appropriate channels provided on our website.
+                        </p>
+
+                        <hr class="my-4">
+
+                        <p class="text-muted small">
+                            <strong>Last reviewed:</strong> <span id="lastReviewed"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 mb-4">
+                    <a href="/" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <div class="mb-2">
+                <a href="/terms" class="text-light text-decoration-none me-3">Terms &amp; Conditions</a>
+                <a href="/" class="text-light text-decoration-none">Home</a>
+            </div>
+            <small>
+                <i class="bi bi-info-circle"></i> 
+                This is a demonstration application. Do not use for actual credit decisions.
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="terms.js"></script>
+</body>
+</html>
