@@ -201,6 +201,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
 
+  /xmas/offers:
+    get:
+      summary: Get holiday offers
+      description: |
+        Retrieve special holiday season offers. This is a stateless endpoint that returns
+        a static list of promotional offers for the Christmas/holiday season.
+      operationId: getHolidayOffers
+      tags:
+        - Holiday
+      responses:
+        '200':
+          description: Holiday offers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HolidayOffersResponse'
+              examples:
+                successful_response:
+                  summary: Successful response
+                  value:
+                    data:
+                      offers:
+                        - id: "offer_1"
+                          title: "Holiday Special"
+                          code: "XMAS20"
+                          description: "20% off your next credit simulation report"
+                        - id: "offer_2"
+                          title: "New Year Deal"
+                          code: "NEWYEAR25"
+                          description: "25% off premium features for new customers"
+                    message: "Offers retrieved successfully"
+                    metadata:
+                      timestamp: "2025-12-18T00:00:00Z"
+                      version: "1.0"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     CustomerInput:
@@ -482,6 +523,53 @@ components:
                 type: string
                 example: "body"
 
+    HolidayOffer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the offer
+          example: "offer_1"
+        title:
+          type: string
+          description: Title of the offer
+          example: "Holiday Special"
+        code:
+          type: string
+          description: Promotional code to use
+          example: "XMAS20"
+        description:
+          type: string
+          description: Description of the offer
+          example: "20% off your next credit simulation report"
+
+    HolidayOffersResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            offers:
+              type: array
+              items:
+                $ref: '#/components/schemas/HolidayOffer'
+        message:
+          type: string
+          description: Success message
+          example: "Offers retrieved successfully"
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: Response timestamp
+              example: "2025-12-18T00:00:00Z"
+            version:
+              type: string
+              description: API version
+              example: "1.0"
+
 tags:
   - name: Credit Simulation
     description: Operations related to credit score simulation
@@ -489,3 +577,5 @@ tags:
     description: Operations for getting system information
   - name: System
     description: System health and status operations
+  - name: Holiday
+    description: Holiday season special features and offers
