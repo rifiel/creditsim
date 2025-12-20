@@ -13,11 +13,9 @@ describe('Terms & Conditions Page', () => {
 
     test('should be publicly accessible without authentication', async () => {
       // This test ensures no auth headers are required
-      const response = await request(app)
+      await request(app)
         .get('/terms')
         .expect(200);
-      
-      expect(response.status).toBe(200);
     });
 
     test('should contain Terms & Conditions title', async () => {
