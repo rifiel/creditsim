@@ -38,6 +38,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+// Serve the Terms & Conditions page
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/terms.html'));
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
