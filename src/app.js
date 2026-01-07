@@ -14,8 +14,9 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
-      fontSrc: ["'self'", "https://cdn.jsdelivr.net"]
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "https://images.unsplash.com", "data:"]
     }
   }
 }));
@@ -36,6 +37,11 @@ app.use('/api', simulationRoutes);
 // Serve the HTML form at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Serve the Fender page
+app.get('/fender', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/fender.html'));
 });
 
 // Global error handler
