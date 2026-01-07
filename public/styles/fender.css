@@ -1,0 +1,274 @@
+/* Fender Guitars - Themed Styling */
+
+:root {
+  --fender-black: #000000;
+  --fender-gold: #D4AF37;
+  --fender-silver: #C0C0C0;
+  --fender-red: #8B0000;
+  --fender-cream: #F5F5DC;
+  --fender-accent: #FFD700;
+}
+
+/* Hero Section */
+.fender-hero {
+  background: linear-gradient(135deg, var(--fender-black) 0%, #1a1a1a 100%);
+  color: var(--fender-cream);
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.fender-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="80" fill="%23D4AF37" opacity="0.05">♪</text></svg>') repeat;
+  background-size: 150px;
+  pointer-events: none;
+}
+
+.fender-hero .hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fender-logo-text {
+  font-family: 'Georgia', serif;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: var(--fender-gold);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+.fender-tagline {
+  color: var(--fender-silver);
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+/* Featured Models Section */
+.featured-models {
+  padding: 4rem 0;
+  background-color: #f8f9fa;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  color: var(--fender-black);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: var(--fender-gold);
+  margin: 1rem auto 0;
+}
+
+/* Model Cards */
+.model-card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.model-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.model-card-img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+.model-card-body {
+  padding: 1.5rem;
+  background: white;
+}
+
+.model-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--fender-black);
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+}
+
+/* Specs Badges */
+.specs-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.spec-badge {
+  background-color: var(--fender-cream);
+  color: var(--fender-black);
+  border: 1px solid var(--fender-gold);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.spec-label {
+  font-weight: bold;
+  margin-right: 0.3rem;
+}
+
+/* CTA Buttons */
+.cta-primary {
+  background-color: var(--fender-gold);
+  color: var(--fender-black);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.cta-primary:hover {
+  background-color: var(--fender-accent);
+  color: var(--fender-black);
+  transform: scale(1.02);
+}
+
+.cta-primary:focus {
+  outline: 3px solid var(--fender-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+}
+
+.cta-secondary {
+  background-color: transparent;
+  color: var(--fender-black);
+  border: 2px solid var(--fender-black);
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.cta-secondary:hover {
+  background-color: var(--fender-black);
+  color: var(--fender-cream);
+}
+
+.cta-secondary:focus {
+  outline: 3px solid var(--fender-black);
+  outline-offset: 2px;
+}
+
+.cta-disabled {
+  background-color: #cccccc;
+  color: #666666;
+  border: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cta-disabled:hover {
+  background-color: #cccccc;
+  color: #666666;
+  transform: none;
+}
+
+/* Price Tag */
+.price-tag {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--fender-red);
+  margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fender-logo-text {
+    font-size: 2.5rem;
+  }
+
+  .fender-tagline {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .model-card-img {
+    height: 200px;
+  }
+
+  .fender-hero {
+    padding: 2rem 0;
+  }
+
+  .featured-models {
+    padding: 2rem 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .fender-logo-text {
+    font-size: 2rem;
+  }
+
+  .specs-container {
+    gap: 0.3rem;
+  }
+
+  .spec-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* Accessibility Enhancements */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--fender-gold);
+  outline-offset: 2px;
+}
+
+/* Touch Target Sizing for Mobile */
+@media (max-width: 768px) {
+  .cta-primary,
+  .cta-secondary {
+    min-height: 48px;
+    padding: 0.85rem 1.5rem;
+  }
+}
+
+/* Placeholder Message Styling */
+.placeholder-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-top: 1rem;
+  text-align: center;
+  color: #856404;
+}
