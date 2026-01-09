@@ -38,6 +38,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+// Serve the What's New page
+app.get('/whats-new', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/whats-new.html'));
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
