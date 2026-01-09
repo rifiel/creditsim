@@ -1,0 +1,32 @@
+[
+  {
+    "id": "2026-01-09-ui-improvements",
+    "title": "Enhanced User Interface",
+    "date": "2026-01-09",
+    "summary": "Improved the overall user experience with a more intuitive layout and better visual feedback during calculations.",
+    "details": "We've redesigned the credit score calculator interface to be more user-friendly. The new design includes better visual hierarchy, improved form validation feedback, and smoother animations.",
+    "imageUrl": "",
+    "imageAlt": "",
+    "links": []
+  },
+  {
+    "id": "2026-01-05-loan-slider",
+    "title": "Interactive Loan Amount Slider",
+    "date": "2026-01-05",
+    "summary": "Added an interactive slider for selecting loan amounts, making it easier to explore different scenarios.",
+    "details": "You can now use a visual slider to select loan amounts between $5,000 and $25,000. The slider provides instant visual feedback and makes it easy to experiment with different loan amounts.",
+    "imageUrl": "",
+    "imageAlt": "",
+    "links": []
+  },
+  {
+    "id": "2026-01-01-simulation-history",
+    "title": "Simulation History",
+    "date": "2026-01-01",
+    "summary": "View all your previous credit score simulations in one convenient location.",
+    "details": "All your previous simulations are now saved and displayed on the main page. You can review past calculations, compare different scenarios, and track how various factors affect credit scores over time.",
+    "imageUrl": "",
+    "imageAlt": "",
+    "links": []
+  }
+]
