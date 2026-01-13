@@ -38,6 +38,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+// Serve the Foundry page
+app.get('/foundry', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/foundry.html'));
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
