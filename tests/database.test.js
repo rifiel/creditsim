@@ -84,8 +84,8 @@ describe('Database module', () => {
   });
 
   test('close succeeds on unopened database connection', async () => {
-    const idleDb = new Database();
+    const unopenedDb = new Database();
 
-    await expect(idleDb.close()).resolves.toBeUndefined();
+    await expect(unopenedDb.close()).resolves.toBeUndefined();
   });
 });
