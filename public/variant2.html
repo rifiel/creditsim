@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Risk Simulator — Clean Minimal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --blue:    #0071e3;
+            --blue-lt: #e8f0fe;
+            --green:   #34c759;
+            --yellow:  #ff9f0a;
+            --red:     #ff3b30;
+            --gray-1:  #f5f5f7;
+            --gray-2:  #e8e8ed;
+            --gray-3:  #86868b;
+            --text:    #1d1d1f;
+            --subtext: #6e6e73;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: #fafafa;
+            color: var(--text);
+            font-family: -apple-system, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
+        .site-nav {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--gray-2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .site-nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
+        }
+        .nav-brand {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .nav-brand i { color: var(--blue); margin-right: 5px; }
+        .nav-demo {
+            font-size: 0.75rem;
+            color: var(--subtext);
+            background: var(--gray-1);
+            border-radius: 99px;
+            padding: 3px 12px;
+        }
+        .back-link {
+            font-size: 0.8rem;
+            color: var(--blue);
+            text-decoration: none;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* ── PAGE HERO ── */
+        .page-hero {
+            padding: 2.5rem 0 1.5rem;
+        }
+        .page-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+        .page-hero p {
+            font-size: 0.95rem;
+            color: var(--subtext);
+            margin-top: 4px;
+        }
+
+        /* ── CARD ── */
+        .clean-card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid var(--gray-2);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        .clean-card-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--gray-2);
+        }
+        .clean-card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+        .clean-card-header .subtitle {
+            font-size: 0.8rem;
+            color: var(--subtext);
+            margin-top: 1px;
+        }
+        .clean-card-body { padding: 1.5rem; }
+
+        /* ── FORM ── */
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--subtext);
+            margin-bottom: 5px;
+        }
+        .form-control, .form-select {
+            border: 1.5px solid var(--gray-2) !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12) !important;
+        }
+        .form-control::placeholder { color: #c7c7cc; }
+        .form-text { font-size: 0.75rem; color: #aeaeb2; margin-top: 4px; }
+
+        /* ── SLIDER ── */
+        .slider-wrap { position: relative; }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #aeaeb2;
+            margin-bottom: 4px;
+        }
+        .slider-labels .val-center {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--blue);
+        }
+        .form-range { accent-color: var(--blue); }
+
+        /* ── SUBMIT BTN ── */
+        .btn-primary-clean {
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: -0.1px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-primary-clean:hover   { opacity: 0.88; color: #fff; transform: translateY(-1px); }
+        .btn-primary-clean:active  { transform: translateY(0); opacity: 1; }
+        .btn-primary-clean:disabled{ opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ── RESULT CARD ── */
+        .result-score-wrap { text-align: center; padding: 1.5rem 0; }
+        .result-score {
+            font-size: 5.5rem;
+            font-weight: 700;
+            letter-spacing: -4px;
+            color: var(--text);
+            line-height: 1;
+        }
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--subtext);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 6px;
+        }
+        .result-customer {
+            font-size: 0.9rem;
+            color: var(--subtext);
+            margin-top: 4px;
+        }
+
+        .risk-pill {
+            display: inline-block;
+            border-radius: 99px;
+            padding: 5px 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .risk-low    { background: rgba(52, 199, 89, 0.12); color: #1d8333; }
+        .risk-medium { background: rgba(255, 159, 10, 0.12); color: #b35900; }
+        .risk-high   { background: rgba(255, 59, 48, 0.12);  color: #c0291e; }
+        .risk-default{ background: var(--gray-1); color: var(--subtext); }
+
+        .result-divider { border-color: var(--gray-2); margin: 1rem 0; }
+
+        .meta-row { display: flex; gap: 1rem; }
+        .meta-item { flex: 1; padding: 0.85rem 1rem; background: var(--gray-1); border-radius: 12px; }
+        .meta-item .meta-label { font-size: 0.7rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
+        .meta-item .meta-value { font-size: 1rem; font-weight: 600; color: var(--text); margin-top: 3px; }
+
+        /* Risk accent left border */
+        .result-card-low    { border-left: 4px solid var(--green); }
+        .result-card-medium { border-left: 4px solid var(--yellow); }
+        .result-card-high   { border-left: 4px solid var(--red); }
+
+        /* ── ERROR ── */
+        .error-card-clean {
+            background: rgba(255,59,48,0.06);
+            border: 1.5px solid rgba(255,59,48,0.2);
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+        }
+        .error-card-clean .etitle { font-weight: 600; color: var(--red); font-size: 0.9rem; }
+        .error-card-clean .ebody  { font-size: 0.875rem; color: #c0291e; margin-top: 4px; }
+
+        /* ── SIMULATIONS ── */
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--subtext);
+            margin-bottom: 0.75rem;
+        }
+        .sim-item {
+            background: #fff;
+            border: 1px solid var(--gray-2);
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+            transition: box-shadow 0.15s, transform 0.15s;
+        }
+        .sim-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .sim-name  { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+        .sim-score { font-size: 1.5rem; font-weight: 700; color: var(--text); letter-spacing: -1px; }
+        .sim-meta  { font-size: 0.72rem; color: var(--subtext); }
+        .sim-loan  { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+
+        /* ── EMPTY / LOADING ── */
+        .placeholder-box {
+            border: 2px dashed var(--gray-2);
+            border-radius: 18px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--subtext);
+            font-size: 0.875rem;
+        }
+        .placeholder-box i { font-size: 2rem; margin-bottom: 0.5rem; color: var(--gray-2); }
+
+        .empty-state { text-align: center; padding: 2rem 0; color: var(--subtext); font-size: 0.9rem; }
+
+        /* ── REFRESH ── */
+        .btn-ghost-clean {
+            background: transparent;
+            border: 1.5px solid var(--gray-2);
+            color: var(--subtext);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            padding: 5px 14px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-ghost-clean:hover { border-color: var(--blue); color: var(--blue); }
+
+        /* ── FOOTER ── */
+        .site-footer {
+            border-top: 1px solid var(--gray-2);
+            color: var(--subtext);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+        .d-none { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="container">
+            <div class="nav-brand"><i class="bi bi-calculator-fill"></i>Credit Risk Simulator</div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="nav-demo">Demo</span>
+                <a href="index.html" class="back-link"><i class="bi bi-arrow-left me-1"></i>All Variants</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-hero">
+            <h1>Credit Risk Simulator</h1>
+            <p>Enter customer information to calculate an instant credit risk score.</p>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Form -->
+            <div class="col-lg-6">
+                <div class="clean-card">
+                    <div class="clean-card-header">
+                        <h2><i class="bi bi-person-fill me-2" style="color:var(--blue);"></i>Customer Information</h2>
+                        <div class="subtitle">All fields are required</div>
+                    </div>
+                    <div class="clean-card-body">
+                        <form id="creditForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Jane Smith" required>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label for="age" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="age" name="age" min="18" max="120" placeholder="25" required>
+                                </div>
+                                <div class="col-6">
+                                    <label for="annualIncome" class="form-label">Annual Income ($)</label>
+                                    <input type="number" class="form-control" id="annualIncome" name="annualIncome" min="0" step="any" placeholder="60,000" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
+                                    <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" placeholder="0.30" required>
+                                    <div class="form-text">e.g. 0.3 = 30%</div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Loan Amount</label>
+                                    <div class="slider-labels">
+                                        <span>$5k</span>
+                                        <span id="loanAmountDisplay" class="val-center">$15,000</span>
+                                        <span>$25k</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="loanAmount" name="loanAmount"
+                                           min="5000" max="25000" step="1000" value="15000" required>
+                                    <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="creditHistory" class="form-label">Credit History</label>
+                                <select class="form-select" id="creditHistory" name="creditHistory" required>
+                                    <option value="">Select…</option>
+                                    <option value="good">Good</option>
+                                    <option value="bad">Bad</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-clean w-100">
+                                <i class="bi bi-calculator me-2"></i>Calculate Credit Score
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result column -->
+            <div class="col-lg-6 d-flex flex-column gap-3">
+
+                <!-- Result card -->
+                <div id="resultCard" class="clean-card d-none">
+                    <div class="clean-card-body">
+                        <div class="result-score-wrap">
+                            <div id="scoreNumber" class="result-score">—</div>
+                            <div class="result-label">Credit Score</div>
+                            <div id="riskCategory" class="risk-pill risk-default">—</div>
+                            <div id="customerName" class="result-customer"></div>
+                        </div>
+                        <hr class="result-divider">
+                        <div class="meta-row">
+                            <div class="meta-item">
+                                <div class="meta-label">Loan Amount</div>
+                                <div id="resultLoanAmount" class="meta-value">—</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Annual Income</div>
+                                <div id="resultIncome" class="meta-value">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error card -->
+                <div id="errorCard" class="d-none">
+                    <div class="error-card-clean">
+                        <div class="etitle"><i class="bi bi-exclamation-circle me-1"></i>Error</div>
+                        <div id="errorMessage" class="ebody"></div>
+                    </div>
+                </div>
+
+                <!-- Placeholder -->
+                <div id="placeholderCard" class="placeholder-box">
+                    <i class="bi bi-clipboard-data"></i>
+                    <div>Your result will appear here</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Simulations -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="section-label"><i class="bi bi-clock-history me-1"></i>Previous Simulations</div>
+                    <button class="btn-ghost-clean" id="refreshBtn"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                </div>
+                <div id="simulationsList">
+                    <div class="empty-state">
+                        <i class="bi bi-hourglass-split" style="font-size:1.5rem;display:block;margin-bottom:6px;"></i>
+                        Loading…
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <i class="bi bi-info-circle me-1"></i>
+            Demonstration only — not for actual credit decisions.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="variant2Config.js"></script>
+    <script src="variantApp.js"></script>
+</body>
+</html>

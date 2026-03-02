@@ -3,209 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Risk Simulator</title>
+    <title>Credit Risk Simulator — Choose a Design</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .score-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
-        .low-risk { border-left: 5px solid #28a745; }
-        .medium-risk { border-left: 5px solid #ffc107; }
-        .high-risk { border-left: 5px solid #dc3545; }
-        .score-number {
-            font-size: 3rem;
-            font-weight: bold;
+        .hero {
+            padding: 4rem 0 2rem;
+            text-align: center;
         }
-        .simulation-item {
-            transition: transform 0.2s;
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: -0.5px;
         }
-        .simulation-item:hover {
-            transform: translateY(-2px);
+        .hero p {
+            font-size: 1.15rem;
+            color: #555;
+            max-width: 520px;
+            margin: 0.75rem auto 0;
         }
-        
-        /* Enhanced range slider styling */
-        .form-range {
-            height: 6px;
-        }
-        .form-range::-webkit-slider-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .form-range::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
+        .variant-card {
             border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+            transition: transform 0.22s, box-shadow 0.22s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            height: 100%;
         }
-        .form-range:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        .variant-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.18);
+            color: inherit;
         }
+        .variant-preview {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Variant 1 preview — Professional Dark */
+        .preview-dark {
+            background: #0f172a;
+        }
+        .preview-dark .mock-nav {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 38px;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+        }
+        .preview-dark .mock-nav-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .preview-dark .mock-nav-brand { color: #38bdf8; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-left: 6px; }
+        .preview-dark .mock-body {
+            display: flex;
+            gap: 10px;
+            padding: 50px 16px 16px;
+            width: 100%;
+        }
+        .preview-dark .mock-card {
+            flex: 1;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 10px;
+            border-left: 3px solid #38bdf8;
+        }
+        .preview-dark .mock-card-line { height: 6px; border-radius: 3px; background: #334155; margin-bottom: 6px; }
+        .preview-dark .mock-score { font-size: 28px; font-weight: 900; color: #38bdf8; text-align: center; margin-top: 4px; }
+        /* Variant 2 preview — Clean Minimal */
+        .preview-minimal {
+            background: #ffffff;
+        }
+        .preview-minimal .mock-nav {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 38px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+        }
+        .preview-minimal .mock-brand { font-size: 12px; font-weight: 700; color: #1d1d1f; }
+        .preview-minimal .mock-body {
+            display: flex;
+            gap: 10px;
+            padding: 50px 16px 16px;
+            width: 100%;
+        }
+        .preview-minimal .mock-card {
+            flex: 1;
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .preview-minimal .mock-card-line { height: 5px; border-radius: 3px; background: #e5e7eb; margin-bottom: 6px; }
+        .preview-minimal .mock-label { font-size: 7px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .preview-minimal .mock-score { font-size: 28px; font-weight: 700; color: #111827; text-align: center; margin-top: 4px; }
+        .preview-minimal .mock-badge { display: inline-block; background: #dcfce7; color: #166534; font-size: 7px; border-radius: 99px; padding: 1px 6px; }
+        /* Variant 3 preview — Gradient/Glassmorphism */
+        .preview-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .preview-gradient .mock-nav {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 38px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+        }
+        .preview-gradient .mock-brand { font-size: 12px; font-weight: 700; color: #fff; }
+        .preview-gradient .mock-body {
+            display: flex;
+            gap: 10px;
+            padding: 50px 16px 16px;
+            width: 100%;
+        }
+        .preview-gradient .mock-card {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .preview-gradient .mock-card-line { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.25); margin-bottom: 6px; }
+        .preview-gradient .mock-score { font-size: 28px; font-weight: 900; color: #fff; text-align: center; margin-top: 4px; }
+        .variant-info {
+            padding: 1.4rem 1.6rem;
+            background: #fff;
+        }
+        .variant-number {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .variant-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+        .variant-desc {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .btn-variant {
+            border-radius: 99px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.45rem 1.25rem;
+        }
+        .d-none { display: none !important; }
     </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.06);">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-calculator"></i> Credit Risk Simulator
-            </a>
-            <span class="navbar-text">
-                Demo Application - Not for Production Use
+            <span class="navbar-brand fw-bold" style="color:#1a1a2e;">
+                <i class="bi bi-calculator-fill text-primary"></i> Credit Risk Simulator
             </span>
+            <span class="navbar-text text-muted small">Design Showcase</span>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Input Form -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-person-plus"></i> Customer Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="creditForm">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="age" class="form-label">Age</label>
-                                        <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="annualIncome" class="form-label">Annual Income ($)</label>
-                                        <input type="number" class="form-control" id="annualIncome" name="annualIncome" min="0" step="any" required>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
-                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" required>
-                                        <div class="form-text">Enter as decimal (e.g., 0.3 for 30%)</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="loanAmount" class="form-label">Loan Amount</label>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">$5,000</span>
-                                            <span id="loanAmountDisplay" class="fw-bold text-primary">$15,000</span>
-                                            <span class="text-muted">$25,000</span>
-                                        </div>
-                                        <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
-                                               min="5000" max="25000" step="1000" value="15000" required>
-                                        <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="creditHistory" class="form-label">Credit History</label>
-                                <select class="form-select" id="creditHistory" name="creditHistory" required>
-                                    <option value="">Select...</option>
-                                    <option value="good">Good</option>
-                                    <option value="bad">Bad</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-calculator"></i> Calculate Credit Score
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results -->
-            <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up"></i> Credit Score Result
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div id="scoreNumber" class="score-number"></div>
-                        <div id="riskCategory" class="badge fs-6 mb-3"></div>
-                        <div id="customerName" class="text-muted"></div>
-                        <hr>
-                        <div class="row text-start">
-                            <div class="col-6">
-                                <small class="text-muted">Loan Amount:</small><br>
-                                <span id="resultLoanAmount"></span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Annual Income:</small><br>
-                                <span id="resultIncome"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="errorCard" class="card border-danger d-none">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Error
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="errorMessage"></div>
-                    </div>
-                </div>
-            </div>
+    <div class="hero">
+        <div class="container">
+            <h1><i class="bi bi-palette text-primary"></i> Choose a Design</h1>
+            <p>Three distinct homepage variants — pick the one that best fits your vision.</p>
         </div>
-        
-        <!-- Previous Simulations -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-clock-history"></i> Previous Simulations
-                        </h5>
-                        <button class="btn btn-outline-primary btn-sm" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="simulationsList">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-hourglass-split"></i> Loading...
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4">
+            <!-- Variant 1 -->
+            <div class="col-md-4">
+                <a href="variant1.html" class="variant-card">
+                    <div class="variant-preview preview-dark">
+                        <div class="mock-nav">
+                            <div class="mock-nav-dot" style="background:#ef4444;"></div>
+                            <div class="mock-nav-dot" style="background:#f59e0b;"></div>
+                            <div class="mock-nav-dot" style="background:#22c55e;"></div>
+                            <span class="mock-nav-brand">CREDITSIM</span>
+                        </div>
+                        <div class="mock-body">
+                            <div class="mock-card" style="max-width:55%;">
+                                <div class="mock-card-line" style="width:70%;"></div>
+                                <div class="mock-card-line" style="width:50%;"></div>
+                                <div class="mock-card-line" style="width:80%;"></div>
+                                <div class="mock-card-line" style="width:60%;"></div>
+                            </div>
+                            <div class="mock-card" style="max-width:40%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                <div class="mock-score">742</div>
+                                <div style="font-size:9px; color:#38bdf8; margin-top:2px;">LOW RISK</div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="variant-info">
+                        <div class="variant-number text-primary">Variant 01</div>
+                        <div class="variant-title">Professional Dark</div>
+                        <p class="variant-desc">A sleek dark-mode dashboard with a teal accent palette — ideal for a modern financial tool.</p>
+                        <span class="btn btn-dark btn-variant">
+                            <i class="bi bi-eye"></i> View Design
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Variant 2 -->
+            <div class="col-md-4">
+                <a href="variant2.html" class="variant-card">
+                    <div class="variant-preview preview-minimal">
+                        <div class="mock-nav">
+                            <span class="mock-brand">Credit Risk Simulator</span>
+                        </div>
+                        <div class="mock-body">
+                            <div class="mock-card" style="max-width:55%;">
+                                <div class="mock-label">Customer Information</div>
+                                <div class="mock-card-line" style="width:80%;"></div>
+                                <div class="mock-card-line" style="width:60%;"></div>
+                                <div class="mock-card-line" style="width:70%;"></div>
+                                <div class="mock-card-line" style="width:50%; background:#3b82f6;"></div>
+                            </div>
+                            <div class="mock-card" style="max-width:40%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+                                <div class="mock-score">742</div>
+                                <div class="mock-badge">Low Risk</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="variant-info">
+                        <div class="variant-number text-success">Variant 02</div>
+                        <div class="variant-title">Clean &amp; Minimal</div>
+                        <p class="variant-desc">A crisp, white, Apple-inspired layout with airy spacing, soft shadows, and refined typography.</p>
+                        <span class="btn btn-outline-dark btn-variant">
+                            <i class="bi bi-eye"></i> View Design
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Variant 3 -->
+            <div class="col-md-4">
+                <a href="variant3.html" class="variant-card">
+                    <div class="variant-preview preview-gradient">
+                        <div class="mock-nav">
+                            <span class="mock-brand">Credit Risk Simulator</span>
+                        </div>
+                        <div class="mock-body">
+                            <div class="mock-card" style="max-width:55%;">
+                                <div class="mock-card-line" style="width:70%;"></div>
+                                <div class="mock-card-line" style="width:50%;"></div>
+                                <div class="mock-card-line" style="width:80%;"></div>
+                                <div class="mock-card-line" style="width:60%;"></div>
+                            </div>
+                            <div class="mock-card" style="max-width:40%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                <div class="mock-score">742</div>
+                                <div style="font-size:9px; color:rgba(255,255,255,0.8); margin-top:2px;">Low Risk</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="variant-info">
+                        <div class="variant-number" style="color:#764ba2;">Variant 03</div>
+                        <div class="variant-title">Gradient &amp; Glass</div>
+                        <p class="variant-desc">A bold purple-to-indigo gradient with frosted-glass cards — vibrant, modern, and striking.</p>
+                        <span class="btn btn-variant text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                            <i class="bi bi-eye"></i> View Design
+                        </span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 
-    <footer class="bg-dark text-light text-center py-3 mt-5">
-        <div class="container">
-            <small>
-                <i class="bi bi-info-circle"></i> 
-                This is a demonstration application. Do not use for actual credit decisions.
-            </small>
-        </div>
+    <footer class="text-center py-4" style="background:rgba(255,255,255,0.6); border-top:1px solid rgba(0,0,0,0.06);">
+        <small class="text-muted">
+            <i class="bi bi-info-circle"></i>
+            This is a demonstration application. Do not use for actual credit decisions.
+        </small>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
 </body>
 </html>
