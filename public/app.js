@@ -27,10 +27,7 @@ class CreditSimulator {
         const loanOutput = document.getElementById('loanAmountOutput');
         const loanHidden = document.getElementById('loanAmountValue');
 
-        loanSlider.setAttribute('aria-valuemin', String(parseInt(loanSlider.min, 10)));
-        loanSlider.setAttribute('aria-valuemax', String(parseInt(loanSlider.max, 10)));
-
-        const updateLoanDisplay = (value) => {
+        const updateLoanSliderState = (value) => {
             const formattedValue = `$${value.toLocaleString()}`;
             loanOutput.textContent = formattedValue;
             loanSlider.setAttribute('aria-valuetext', formattedValue);
@@ -41,10 +38,10 @@ class CreditSimulator {
         // Update display when slider changes
         loanSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
-            updateLoanDisplay(value);
+            updateLoanSliderState(value);
         });
 
-        updateLoanDisplay(parseInt(loanSlider.value));
+        updateLoanSliderState(parseInt(loanSlider.value));
     }
     
     async handleFormSubmit(e) {
