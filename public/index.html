@@ -121,14 +121,14 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="loanAmount" class="form-label">Loan Amount</label>
-                                        <div class="form-text" id="loanAmountHelp">Use the slider to select a loan amount between $5,000 and $25,000.</div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">$5,000</span>
-                                            <output id="loanAmountOutput" class="fw-bold text-primary" for="loanAmount">$15,000</output>
+                                            <output id="loanAmountOutput" class="fw-bold text-primary">$15,000</output>
                                             <span class="text-muted">$25,000</span>
                                         </div>
                                         <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
                                                min="5000" max="25000" step="1000" value="15000" aria-describedby="loanAmountHelp" aria-valuetext="$15,000" required>
+                                        <div class="form-text" id="loanAmountHelp">Use the slider to select a loan amount between $5,000 and $25,000.</div>
                                         <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
                                     </div>
                                 </div>
