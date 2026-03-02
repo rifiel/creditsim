@@ -53,7 +53,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-calculator"></i> Credit Risk Simulator
+                <i class="bi bi-calculator" aria-hidden="true"></i> Credit Risk Simulator
             </a>
             <span class="navbar-text">
                 Demo Application - Not for Production Use
@@ -61,14 +61,14 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <main class="container mt-4" id="mainContent">
         <div class="row">
             <!-- Input Form -->
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-person-plus"></i> Customer Information
+                            <i class="bi bi-person-plus" aria-hidden="true"></i> Customer Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -97,8 +97,8 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
-                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" required>
-                                        <div class="form-text">Enter as decimal (e.g., 0.3 for 30%)</div>
+                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" aria-describedby="debtToIncomeHelp" required>
+                                        <div class="form-text" id="debtToIncomeHelp">Enter as decimal (e.g., 0.3 for 30%)</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -106,11 +106,12 @@
                                         <label for="loanAmount" class="form-label">Loan Amount</label>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">$5,000</span>
-                                            <span id="loanAmountDisplay" class="fw-bold text-primary">$15,000</span>
+                                            <output id="loanAmountOutput" class="fw-bold text-primary" for="loanAmount" aria-live="polite">$15,000</output>
                                             <span class="text-muted">$25,000</span>
                                         </div>
+                                        <div class="form-text" id="loanAmountHelp">Use the slider to select a loan amount between $5,000 and $25,000.</div>
                                         <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
-                                               min="5000" max="25000" step="1000" value="15000" required>
+                                               min="5000" max="25000" step="1000" value="15000" aria-describedby="loanAmountHelp" aria-valuetext="$15,000" required>
                                         <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
                                     </div>
                                 </div>
@@ -126,7 +127,7 @@
                             </div>
                             
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-calculator"></i> Calculate Credit Score
+                                <i class="bi bi-calculator" aria-hidden="true"></i> Calculate Credit Score
                             </button>
                         </form>
                     </div>
@@ -135,10 +136,10 @@
             
             <!-- Results -->
             <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none">
+                <div id="resultCard" class="card score-card d-none" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up"></i> Credit Score Result
+                            <i class="bi bi-graph-up" aria-hidden="true"></i> Credit Score Result
                         </h5>
                     </div>
                     <div class="card-body text-center">
@@ -159,10 +160,10 @@
                     </div>
                 </div>
                 
-                <div id="errorCard" class="card border-danger d-none">
+                <div id="errorCard" class="card border-danger d-none" role="alert" aria-live="assertive" aria-atomic="true" tabindex="-1">
                     <div class="card-header bg-danger text-white">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Error
+                            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Error
                         </h5>
                     </div>
                     <div class="card-body">
@@ -178,28 +179,28 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-clock-history"></i> Previous Simulations
+                            <i class="bi bi-clock-history" aria-hidden="true"></i> Previous Simulations
                         </h5>
                         <button class="btn btn-outline-primary btn-sm" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                            <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
                         </button>
                     </div>
                     <div class="card-body">
-                        <div id="simulationsList">
+                        <div id="simulationsList" aria-live="polite">
                             <div class="text-center text-muted">
-                                <i class="bi bi-hourglass-split"></i> Loading...
+                                <i class="bi bi-hourglass-split" aria-hidden="true"></i> Loading...
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <footer class="bg-dark text-light text-center py-3 mt-5">
         <div class="container">
             <small>
-                <i class="bi bi-info-circle"></i> 
+                <i class="bi bi-info-circle" aria-hidden="true"></i> 
                 This is a demonstration application. Do not use for actual credit decisions.
             </small>
         </div>

@@ -24,15 +24,23 @@ class CreditSimulator {
     
     setupLoanSlider() {
         const loanSlider = document.getElementById('loanAmount');
-        const loanDisplay = document.getElementById('loanAmountDisplay');
+        const loanOutput = document.getElementById('loanAmountOutput');
         const loanHidden = document.getElementById('loanAmountValue');
+
+        const updateLoanDisplay = (value) => {
+            const formattedValue = `$${value.toLocaleString()}`;
+            loanOutput.textContent = formattedValue;
+            loanSlider.setAttribute('aria-valuetext', formattedValue);
+            loanHidden.value = value;
+        };
         
         // Update display when slider changes
         loanSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
-            loanDisplay.textContent = `$${value.toLocaleString()}`;
-            loanHidden.value = value;
+            updateLoanDisplay(value);
         });
+
+        updateLoanDisplay(parseInt(loanSlider.value));
     }
     
     async handleFormSubmit(e) {
@@ -112,7 +120,7 @@ class CreditSimulator {
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> 
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> 
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
@@ -123,7 +131,7 @@ class CreditSimulator {
         if (simulations.length === 0) {
             this.simulationsList.innerHTML = `
                 <div class="text-center text-muted">
-                    <i class="bi bi-inbox"></i><br>
+                    <i class="bi bi-inbox" aria-hidden="true"></i><br>
                     No simulations yet. Submit your first calculation above!
                 </div>
             `;
@@ -135,7 +143,7 @@ class CreditSimulator {
             const riskBadgeClass = this.getRiskBadgeClass(sim.riskCategory);
             
             return `
-                <div class="col-md-6 col-lg-4 mb-3">
+                <div class="col-md-6 col-lg-4 mb-3" role="listitem">
                     <div class="card simulation-item h-100 ${riskClass}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -154,7 +162,7 @@ class CreditSimulator {
                             </div>
                             <div class="mt-2">
                                 <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> 
+                                    <i class="bi bi-calendar" aria-hidden="true"></i> 
                                     ${this.formatDate(sim.createdAt)}
                                 </small>
                             </div>
@@ -165,7 +173,7 @@ class CreditSimulator {
         }).join('');
         
         this.simulationsList.innerHTML = `
-            <div class="row">
+            <div class="row" role="list">
                 ${simulationsHtml}
             </div>
         `;
@@ -189,11 +197,13 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+        this.resultCard.focus();
     }
     
     showError(message) {
         document.getElementById('errorMessage').textContent = message;
         this.errorCard.classList.remove('d-none');
+        this.errorCard.focus();
     }
     
     hideCards() {
@@ -203,13 +213,13 @@ class CreditSimulator {
     
     showLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculating...';
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split" aria-hidden="true"></i> Calculating...';
         submitBtn.disabled = true;
     }
     
     hideLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-calculator"></i> Calculate Credit Score';
+        submitBtn.innerHTML = '<i class="bi bi-calculator" aria-hidden="true"></i> Calculate Credit Score';
         submitBtn.disabled = false;
     }
     
