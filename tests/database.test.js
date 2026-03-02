@@ -80,7 +80,7 @@ describe('Database module', () => {
     expect(fetched).toBeUndefined();
   });
 
-  test('getCustomerById returns undefined for invalid identifier types', async () => {
+  test('getCustomerById returns undefined for non-numeric id values', async () => {
     await expect(testDb.getCustomerById(undefined)).resolves.toBeUndefined();
     await expect(testDb.getCustomerById(null)).resolves.toBeUndefined();
     await expect(testDb.getCustomerById('not-a-number')).resolves.toBeUndefined();

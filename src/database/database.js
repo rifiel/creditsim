@@ -128,8 +128,8 @@ class Database {
       batches.push(ids.slice(i, i + batchSize));
     }
 
-    return batches.reduce(
-      (promise, batch) => promise.then(() => new Promise((resolve, reject) => {
+    for (const batch of batches) {
+      await new Promise((resolve, reject) => {
         const placeholders = batch.map(() => '?').join(', ');
         const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
 
@@ -141,9 +141,8 @@ class Database {
             resolve();
           }
         });
-      })),
-      Promise.resolve()
-    );
+      });
+    }
   }
 
   async close() {
