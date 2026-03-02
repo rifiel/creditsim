@@ -144,7 +144,7 @@ class CreditSimulator {
             const riskBadgeClass = this.getRiskBadgeClass(sim.riskCategory);
             
             return `
-                <li class="col-md-6 col-lg-4 mb-3">
+                <div class="col-md-6 col-lg-4 mb-3" role="listitem">
                     <div class="card simulation-item h-100 ${riskClass}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -169,14 +169,14 @@ class CreditSimulator {
                             </div>
                         </div>
                     </div>
-                </li>
+                </div>
             `;
         }).join('');
         
         this.simulationsList.innerHTML = `
-            <ul class="row list-unstyled">
+            <div class="row" role="list">
                 ${simulationsHtml}
-            </ul>
+            </div>
         `;
     }
     
