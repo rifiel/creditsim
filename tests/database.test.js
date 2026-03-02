@@ -102,7 +102,7 @@ describe('Database module', () => {
     insertedIds.push(inserted.id);
     const customers = await testDb.getAllCustomers();
 
-    expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
+    expect(customers.find((customer) => customer.id === inserted.id)).toBeDefined();
   });
 
   test('deleteCustomersByIds removes matching customers', async () => {
