@@ -173,7 +173,7 @@ class CreditSimulator {
         }).join('');
         
         this.simulationsList.innerHTML = `
-            <ul class="row list-unstyled" role="list">
+            <ul class="row list-unstyled">
                 ${simulationsHtml}
             </ul>
         `;

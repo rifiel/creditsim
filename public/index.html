@@ -47,9 +47,26 @@
         .form-range:focus {
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
+        .skip-link {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #0d6efd;
+            color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transform: translateY(-200%);
+            transition: transform 0.2s ease-in-out;
+            z-index: 1050;
+        }
+        .skip-link:focus {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-light">
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="#">
