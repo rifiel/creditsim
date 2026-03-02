@@ -2,11 +2,37 @@ const { Database } = require('../src/database/database');
 
 describe('Database module', () => {
   let testDb;
+  let insertedIds = [];
+
+  const deleteCustomers = async (ids) => {
+    if (!ids.length) {
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      const placeholders = ids.map(() => '?').join(', ');
+      testDb.db.run(`DELETE FROM customers WHERE id IN (${placeholders})`, ids, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  };
 
   beforeAll(async () => {
     testDb = new Database();
     await testDb.connect();
     await testDb.createTables();
+  });
+
+  beforeEach(() => {
+    insertedIds = [];
+  });
+
+  afterEach(async () => {
+    await deleteCustomers(insertedIds);
   });
 
   afterAll(async () => {
@@ -26,6 +52,7 @@ describe('Database module', () => {
     };
 
     const result = await testDb.insertCustomer(customerData);
+    insertedIds.push(result.id);
 
     expect(result).toEqual(expect.objectContaining(customerData));
     expect(result.id).toBeDefined();
@@ -44,6 +71,7 @@ describe('Database module', () => {
     };
 
     const inserted = await testDb.insertCustomer(customerData);
+    insertedIds.push(inserted.id);
     const fetched = await testDb.getCustomerById(inserted.id);
 
     expect(fetched).toEqual(expect.objectContaining({
@@ -60,7 +88,7 @@ describe('Database module', () => {
   });
 
   test('getCustomerById returns undefined for missing customer', async () => {
-    const fetched = await testDb.getCustomerById(9999999);
+    const fetched = await testDb.getCustomerById(-1);
 
     expect(fetched).toBeUndefined();
   });
@@ -78,6 +106,7 @@ describe('Database module', () => {
     };
 
     const inserted = await testDb.insertCustomer(customerData);
+    insertedIds.push(inserted.id);
     const customers = await testDb.getAllCustomers();
 
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
