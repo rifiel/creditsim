@@ -194,15 +194,57 @@ class CreditSimulator {
             </li>
         `);
 
-        // Page number buttons
-        for (let i = 1; i <= totalPages; i++) {
-            items.push(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>
-            `);
+        // Page number buttons with windowing and ellipses for large page counts
+        const maxVisiblePages = 7; // total number of page buttons to keep UI performant and clean
+        const pages = [];
+
+        if (totalPages <= maxVisiblePages) {
+            // Small number of pages: show all
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            const siblingCount = 1; // how many pages to show on each side of currentPage
+            const left = Math.max(2, currentPage - siblingCount);
+            const right = Math.min(totalPages - 1, currentPage + siblingCount);
+
+            // Always show the first page
+            pages.push(1);
+
+            // Insert left ellipsis if there is a gap between first page and left window
+            if (left > 2) {
+                pages.push('ellipsis-left');
+            }
+
+            // Pages around the current page
+            for (let i = left; i <= right; i++) {
+                pages.push(i);
+            }
+
+            // Insert right ellipsis if there is a gap between right window and last page
+            if (right < totalPages - 1) {
+                pages.push('ellipsis-right');
+            }
+
+            // Always show the last page
+            pages.push(totalPages);
         }
 
+        pages.forEach(page => {
+            if (page === 'ellipsis-left' || page === 'ellipsis-right') {
+                items.push(`
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">…</span>
+                    </li>
+                `);
+            } else {
+                items.push(`
+                    <li class="page-item ${page === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${page}">${page}</a>
+                    </li>
+                `);
+            }
+        });
         // Next button
         items.push(`
             <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
