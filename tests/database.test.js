@@ -15,7 +15,11 @@ describe('Database module', () => {
   });
 
   afterEach(async () => {
-    await testDb.deleteCustomersByIds(insertedIds);
+    try {
+      await testDb.deleteCustomersByIds(insertedIds);
+    } finally {
+      insertedIds = [];
+    }
   });
 
   afterAll(async () => {

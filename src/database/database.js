@@ -112,19 +112,16 @@ class Database {
       return Promise.reject(new Error('Customer IDs must be integers'));
     }
 
-    return ids.reduce(
-      (promise, id) => promise.then(() => new Promise((resolve, reject) => {
-        this.db.run('DELETE FROM customers WHERE id = ?', [id], (err) => {
-          if (err) {
-            console.error('Error deleting customers:', err.message);
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      })),
-      Promise.resolve()
-    );
+    return Promise.all(ids.map((id) => new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM customers WHERE id = ?', [id], (err) => {
+        if (err) {
+          console.error('Error deleting customers:', err.message);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    }))).then(() => undefined);
   }
 
   async close() {
