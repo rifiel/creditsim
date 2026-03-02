@@ -106,7 +106,7 @@
                                         <label for="loanAmount" class="form-label">Loan Amount</label>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">$5,000</span>
-                                            <output id="loanAmountOutput" class="fw-bold text-primary" for="loanAmount" aria-live="polite">$15,000</output>
+                                            <output id="loanAmountOutput" class="fw-bold text-primary" for="loanAmount">$15,000</output>
                                             <span class="text-muted">$25,000</span>
                                         </div>
                                         <div class="form-text" id="loanAmountHelp">Use the slider to select a loan amount between $5,000 and $25,000.</div>
@@ -136,7 +136,7 @@
             
             <!-- Results -->
             <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
+                <div id="resultCard" class="card score-card d-none" role="status" aria-atomic="true">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-graph-up" aria-hidden="true"></i> Credit Score Result
@@ -160,7 +160,7 @@
                     </div>
                 </div>
                 
-                <div id="errorCard" class="card border-danger d-none" role="alert" aria-live="assertive" aria-atomic="true" tabindex="-1">
+                <div id="errorCard" class="card border-danger d-none" role="alert" aria-atomic="true">
                     <div class="card-header bg-danger text-white">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Error

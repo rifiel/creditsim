@@ -197,13 +197,11 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
-        this.resultCard.focus();
     }
     
     showError(message) {
         document.getElementById('errorMessage').textContent = message;
         this.errorCard.classList.remove('d-none');
-        this.errorCard.focus();
     }
     
     hideCards() {
