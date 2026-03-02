@@ -104,6 +104,16 @@ class Database {
   }
 
   async deleteCustomersByIds(ids) {
+    const maxIds = 1000;
+
+    if (!Array.isArray(ids)) {
+      throw new Error('Customer IDs must be an array');
+    }
+
+    if (ids.length > maxIds) {
+      throw new Error('Too many customer IDs');
+    }
+
     if (!ids.every((id) => Number.isInteger(id))) {
       throw new Error('Customer IDs must be integers');
     }

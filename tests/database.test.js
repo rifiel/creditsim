@@ -2,7 +2,7 @@ const { Database } = require('../src/database/database');
 
 describe('Database module', () => {
   let testDb;
-  let insertedIds = [];
+  let testCustomerIds = [];
 
   beforeAll(async () => {
     testDb = new Database();
@@ -11,14 +11,14 @@ describe('Database module', () => {
   });
 
   beforeEach(() => {
-    insertedIds = [];
+    testCustomerIds = [];
   });
 
   afterEach(async () => {
     try {
-      await testDb.deleteCustomersByIds(insertedIds);
+      await testDb.deleteCustomersByIds(testCustomerIds);
     } finally {
-      insertedIds = [];
+      testCustomerIds = [];
     }
   });
 
@@ -39,7 +39,7 @@ describe('Database module', () => {
     };
 
     const result = await testDb.insertCustomer(customerData);
-    insertedIds.push(result.id);
+    testCustomerIds.push(result.id);
 
     expect(result).toEqual(expect.objectContaining(customerData));
     expect(result.id).toBeDefined();
@@ -58,7 +58,7 @@ describe('Database module', () => {
     };
 
     const inserted = await testDb.insertCustomer(customerData);
-    insertedIds.push(inserted.id);
+    testCustomerIds.push(inserted.id);
     const fetched = await testDb.getCustomerById(inserted.id);
 
     expect(fetched).toEqual(expect.objectContaining({
@@ -99,7 +99,7 @@ describe('Database module', () => {
     };
 
     const inserted = await testDb.insertCustomer(customerData);
-    insertedIds.push(inserted.id);
+    testCustomerIds.push(inserted.id);
     const customers = await testDb.getAllCustomers();
 
     const found = customers.find((customer) => customer.id === inserted.id);
@@ -119,7 +119,7 @@ describe('Database module', () => {
     };
 
     const inserted = await testDb.insertCustomer(customerData);
-    insertedIds.push(inserted.id);
+    testCustomerIds.push(inserted.id);
 
     await testDb.deleteCustomersByIds([inserted.id]);
 
@@ -152,7 +152,7 @@ describe('Database module', () => {
 
     const firstInserted = await testDb.insertCustomer(firstCustomer);
     const secondInserted = await testDb.insertCustomer(secondCustomer);
-    insertedIds.push(firstInserted.id, secondInserted.id);
+    testCustomerIds.push(firstInserted.id, secondInserted.id);
 
     await testDb.deleteCustomersByIds([firstInserted.id, secondInserted.id]);
 
@@ -162,6 +162,16 @@ describe('Database module', () => {
 
   test('deleteCustomersByIds rejects non-integer ids', async () => {
     await expect(testDb.deleteCustomersByIds(['oops'])).rejects.toThrow('Customer IDs must be integers');
+  });
+
+  test('deleteCustomersByIds rejects non-array input', async () => {
+    await expect(testDb.deleteCustomersByIds('not-an-array')).rejects.toThrow('Customer IDs must be an array');
+  });
+
+  test('deleteCustomersByIds rejects too many ids', async () => {
+    const tooManyIds = Array.from({ length: 1001 }, (_, index) => index + 1);
+
+    await expect(testDb.deleteCustomersByIds(tooManyIds)).rejects.toThrow('Too many customer IDs');
   });
 
   test('close handles uninitialized database gracefully', async () => {
