@@ -4,23 +4,6 @@ describe('Database module', () => {
   let testDb;
   let insertedIds = [];
 
-  const deleteCustomers = async (ids) => {
-    if (!ids.length) {
-      return;
-    }
-
-    await new Promise((resolve, reject) => {
-      const placeholders = ids.map(() => '?').join(', ');
-      testDb.db.run(`DELETE FROM customers WHERE id IN (${placeholders})`, ids, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-  };
-
   beforeAll(async () => {
     testDb = new Database();
     await testDb.connect();
@@ -32,7 +15,7 @@ describe('Database module', () => {
   });
 
   afterEach(async () => {
-    await deleteCustomers(insertedIds);
+    await testDb.deleteCustomersByIds(insertedIds);
   });
 
   afterAll(async () => {
@@ -112,7 +95,7 @@ describe('Database module', () => {
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
   });
 
-  test('close succeeds on unopened database connection', async () => {
+  test('close resolves without error when called on unopened database', async () => {
     const unopenedDb = new Database();
 
     await expect(unopenedDb.close()).resolves.toBeUndefined();

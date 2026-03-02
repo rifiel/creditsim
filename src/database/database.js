@@ -103,6 +103,26 @@ class Database {
     });
   }
 
+  async deleteCustomersByIds(ids) {
+    if (!ids.length) {
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      const placeholders = ids.map(() => '?').join(', ');
+      const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
+
+      this.db.run(deleteSQL, ids, (err) => {
+        if (err) {
+          console.error('Error deleting customers:', err.message);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
   async close() {
     return new Promise((resolve, reject) => {
       if (this.db) {
