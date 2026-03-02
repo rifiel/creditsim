@@ -46,7 +46,9 @@ class CreditSimulator {
 
         const availableVariants = this.variantButtons.map((button) => button.dataset.variant);
         const storedVariant = localStorage.getItem('homepageVariant');
-        const initialVariant = availableVariants.includes(storedVariant) ? storedVariant : availableVariants[0];
+        const initialVariant = availableVariants.includes(storedVariant)
+            ? storedVariant
+            : (availableVariants[0] || 'classic');
         this.applyVariant(initialVariant);
         localStorage.setItem('homepageVariant', initialVariant);
 
@@ -65,6 +67,10 @@ class CreditSimulator {
 
     applyVariant(variant) {
         document.body.setAttribute('data-variant', variant);
+
+        if (!this.variantButtons) {
+            return;
+        }
 
         this.variantButtons.forEach((button) => {
             const isActive = button.dataset.variant === variant;
