@@ -83,7 +83,7 @@ describe('Database module', () => {
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
   });
 
-  test('close resolves when database was never opened', async () => {
+  test('close succeeds on unopened database connection', async () => {
     const idleDb = new Database();
 
     await expect(idleDb.close()).resolves.toBeUndefined();
