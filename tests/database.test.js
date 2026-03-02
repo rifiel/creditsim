@@ -76,6 +76,11 @@ describe('Database module', () => {
     expect(fetched).toBeUndefined();
   });
 
+  test('getCustomerById returns undefined for invalid identifiers', async () => {
+    await expect(testDb.getCustomerById(undefined)).resolves.toBeUndefined();
+    await expect(testDb.getCustomerById('not-a-number')).resolves.toBeUndefined();
+  });
+
   test('getAllCustomers includes inserted customer', async () => {
     const customerData = {
       name: 'Database List User',
@@ -93,6 +98,10 @@ describe('Database module', () => {
     const customers = await testDb.getAllCustomers();
 
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
+  });
+
+  test('deleteCustomersByIds rejects non-integer ids', async () => {
+    await expect(testDb.deleteCustomersByIds(['oops'])).rejects.toThrow('Customer IDs must be integers');
   });
 
   test('close handles uninitialized database gracefully', async () => {

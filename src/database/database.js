@@ -108,6 +108,10 @@ class Database {
       return Promise.resolve();
     }
 
+    if (!ids.every((id) => Number.isInteger(id))) {
+      return Promise.reject(new Error('Customer IDs must be integers'));
+    }
+
     return new Promise((resolve, reject) => {
       const placeholders = ids.map(() => '?').join(', ');
       const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
