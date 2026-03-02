@@ -27,11 +27,14 @@ class CreditSimulator {
         const loanDisplay = document.getElementById('loanAmountDisplay');
         const loanHidden = document.getElementById('loanAmountValue');
         
-        // Update display when slider changes
+        // Update display and ARIA attributes when slider changes
         loanSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
-            loanDisplay.textContent = `$${value.toLocaleString()}`;
+            const formatted = `$${value.toLocaleString()}`;
+            loanDisplay.textContent = formatted;
             loanHidden.value = value;
+            loanSlider.setAttribute('aria-valuenow', value);
+            loanSlider.setAttribute('aria-valuetext', formatted);
         });
     }
     
@@ -111,8 +114,8 @@ class CreditSimulator {
             this.renderSimulations(data.simulations);
         } catch (error) {
             this.simulationsList.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> 
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> 
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
@@ -123,7 +126,7 @@ class CreditSimulator {
         if (simulations.length === 0) {
             this.simulationsList.innerHTML = `
                 <div class="text-center text-muted">
-                    <i class="bi bi-inbox"></i><br>
+                    <i class="bi bi-inbox" aria-hidden="true"></i><br>
                     No simulations yet. Submit your first calculation above!
                 </div>
             `;
@@ -136,10 +139,10 @@ class CreditSimulator {
             
             return `
                 <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card simulation-item h-100 ${riskClass}">
+                    <div class="card simulation-item h-100 ${riskClass}" aria-label="${this.escapeHtml(sim.name)}: credit score ${sim.score}, ${sim.riskCategory}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">${this.escapeHtml(sim.name)}</h6>
+                                <h3 class="card-title mb-0 h6">${this.escapeHtml(sim.name)}</h3>
                                 <span class="badge ${riskBadgeClass}">${sim.riskCategory}</span>
                             </div>
                             <div class="row">
@@ -154,8 +157,8 @@ class CreditSimulator {
                             </div>
                             <div class="mt-2">
                                 <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> 
-                                    ${this.formatDate(sim.createdAt)}
+                                    <i class="bi bi-calendar" aria-hidden="true"></i> 
+                                    <span class="visually-hidden">Date: </span>${this.formatDate(sim.createdAt)}
                                 </small>
                             </div>
                         </div>
@@ -189,11 +192,19 @@ class CreditSimulator {
         this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
         
         this.resultCard.classList.remove('d-none');
+
+        // Move focus to the result card so screen readers announce it
+        this.resultCard.setAttribute('tabindex', '-1');
+        this.resultCard.focus();
     }
     
     showError(message) {
         document.getElementById('errorMessage').textContent = message;
         this.errorCard.classList.remove('d-none');
+
+        // Move focus to error card so screen readers announce it immediately
+        this.errorCard.setAttribute('tabindex', '-1');
+        this.errorCard.focus();
     }
     
     hideCards() {
@@ -203,14 +214,18 @@ class CreditSimulator {
     
     showLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculating...';
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split" aria-hidden="true"></i> Calculating...';
         submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy', 'true');
+        this.form.setAttribute('aria-busy', 'true');
     }
     
     hideLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-calculator"></i> Calculate Credit Score';
+        submitBtn.innerHTML = '<i class="bi bi-calculator" aria-hidden="true"></i> Calculate Credit Score';
         submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        this.form.removeAttribute('aria-busy');
     }
     
     getRiskClass(riskCategory) {
