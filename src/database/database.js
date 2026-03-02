@@ -88,6 +88,32 @@ class Database {
     });
   }
 
+  async getCustomersPaginated(page, limit) {
+    const offset = (page - 1) * limit;
+
+    return new Promise((resolve, reject) => {
+      const countSQL = 'SELECT COUNT(*) AS total FROM customers';
+
+      this.db.get(countSQL, [], (err, countRow) => {
+        if (err) {
+          console.error('Error counting customers:', err.message);
+          return reject(err);
+        }
+
+        const total = countRow.total;
+        const selectSQL = 'SELECT * FROM customers ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+
+        this.db.all(selectSQL, [limit, offset], (err, rows) => {
+          if (err) {
+            console.error('Error fetching customers (paginated):', err.message);
+            return reject(err);
+          }
+          resolve({ simulations: rows, total });
+        });
+      });
+    });
+  }
+
   async getCustomerById(id) {
     return new Promise((resolve, reject) => {
       const selectSQL = 'SELECT * FROM customers WHERE id = ?';

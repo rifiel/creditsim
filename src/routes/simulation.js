@@ -99,14 +99,33 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
 
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get paginated previous simulations
  */
 router.get('/simulations', async (req, res) => {
+  const PAGE_SIZE = 10;
+  const rawPage = req.query.page;
+  let page;
+
+  if (rawPage === undefined) {
+    page = 1;
+  } else {
+    page = Number(rawPage);
+    if (!Number.isInteger(page) || page < 1) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: [{ msg: 'Page must be a positive integer', path: 'page', location: 'query' }]
+      });
+    }
+  }
+
   try {
-    const simulations = await database.getAllCustomers();
-    
+    const { simulations, total } = await database.getCustomersPaginated(page, PAGE_SIZE);
+    const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+
     res.json({
-      count: simulations.length,
+      count: total,
+      page,
+      totalPages,
       simulations: simulations.map(sim => ({
         id: sim.id,
         name: sim.name,

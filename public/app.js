@@ -7,6 +7,7 @@ class CreditSimulator {
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
+        this.currentPage = 1;
         
         this.init();
     }
@@ -45,7 +46,8 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            this.currentPage = 1;
+            this.loadSimulations(); // Refresh the list from page 1
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -101,7 +103,7 @@ class CreditSimulator {
     
     async loadSimulations() {
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${this.currentPage}`);
             const data = await response.json();
             
             if (!response.ok) {
@@ -109,6 +111,7 @@ class CreditSimulator {
             }
             
             this.renderSimulations(data.simulations);
+            this.renderPagination(data.page, data.totalPages);
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
@@ -171,6 +174,64 @@ class CreditSimulator {
         `;
     }
     
+    renderPagination(currentPage, totalPages) {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return;
+
+        if (!totalPages || totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const items = [];
+
+        // Previous button
+        items.push(`
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `);
+
+        // Page number buttons
+        for (let i = 1; i <= totalPages; i++) {
+            items.push(`
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+
+        // Next button
+        items.push(`
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `);
+
+        container.innerHTML = `
+            <nav aria-label="Simulation history pagination">
+                <ul class="pagination mb-0">
+                    ${items.join('')}
+                </ul>
+            </nav>
+        `;
+
+        // Attach click handlers
+        container.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = parseInt(e.currentTarget.getAttribute('data-page'), 10);
+                if (page < 1 || page > totalPages) return;
+                this.currentPage = page;
+                this.loadSimulations();
+            });
+        });
+    }
+
     showResult(result) {
         const { score, riskCategory, customer } = result;
         
