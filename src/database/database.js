@@ -124,10 +124,6 @@ class Database {
 
     return new Promise((resolve, reject) => {
       const placeholders = ids.map(() => '?').join(', ');
-      if (!/^\?(\s*,\s*\?)*$/.test(placeholders)) {
-        reject(new Error('Invalid customer ID placeholders'));
-        return;
-      }
       const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
 
       this.db.run(deleteSQL, ids, (err) => {
