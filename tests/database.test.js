@@ -1,10 +1,10 @@
-const { database } = require('../src/database/database');
+const { Database } = require('../src/database/database');
 
 describe('Database module', () => {
   let testDb;
 
   beforeAll(async () => {
-    testDb = new database.constructor();
+    testDb = new Database();
     await testDb.connect();
     await testDb.createTables();
   });
@@ -84,7 +84,7 @@ describe('Database module', () => {
   });
 
   test('close resolves when database was never opened', async () => {
-    const idleDb = new database.constructor();
+    const idleDb = new Database();
 
     await expect(idleDb.close()).resolves.toBeUndefined();
   });

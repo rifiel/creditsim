@@ -138,5 +138,6 @@ async function initializeDatabase() {
 
 module.exports = {
   database,
-  initializeDatabase
+  initializeDatabase,
+  Database
 };
