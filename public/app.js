@@ -31,6 +31,9 @@ class CreditSimulator {
             const formattedValue = `$${value.toLocaleString()}`;
             loanOutput.textContent = formattedValue;
             loanSlider.setAttribute('aria-valuetext', formattedValue);
+            loanSlider.setAttribute('aria-valuenow', String(value));
+            loanSlider.setAttribute('aria-valuemin', loanSlider.min);
+            loanSlider.setAttribute('aria-valuemax', loanSlider.max);
             loanHidden.value = value;
         };
         
