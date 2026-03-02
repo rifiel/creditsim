@@ -105,6 +105,7 @@ class Database {
 
   async deleteCustomersByIds(ids) {
     const maxIds = 1000;
+    const batchSize = 200;
 
     if (!Array.isArray(ids)) {
       throw new Error('Customer IDs must be an array');
@@ -122,19 +123,27 @@ class Database {
       throw new Error('Customer IDs must be integers');
     }
 
-    return new Promise((resolve, reject) => {
-      const placeholders = ids.map(() => '?').join(', ');
-      const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
+    const batches = [];
+    for (let i = 0; i < ids.length; i += batchSize) {
+      batches.push(ids.slice(i, i + batchSize));
+    }
 
-      this.db.run(deleteSQL, ids, (err) => {
-        if (err) {
-          console.error('Error deleting customers:', err.message);
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    return batches.reduce(
+      (promise, batch) => promise.then(() => new Promise((resolve, reject) => {
+        const placeholders = batch.map(() => '?').join(', ');
+        const deleteSQL = `DELETE FROM customers WHERE id IN (${placeholders})`;
+
+        this.db.run(deleteSQL, batch, (err) => {
+          if (err) {
+            console.error('Error deleting customers:', err.message);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      })),
+      Promise.resolve()
+    );
   }
 
   async close() {

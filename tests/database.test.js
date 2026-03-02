@@ -169,7 +169,7 @@ describe('Database module', () => {
   });
 
   test('deleteCustomersByIds rejects too many ids', async () => {
-    const tooManyIds = Array.from({ length: 1001 }, (value, index) => index + 1);
+    const tooManyIds = Array.from({ length: 1001 }, (_, index) => index + 1);
 
     await expect(testDb.deleteCustomersByIds(tooManyIds)).rejects.toThrow('Too many customer IDs');
   });
