@@ -27,8 +27,8 @@ class CreditSimulator {
         const loanOutput = document.getElementById('loanAmountOutput');
         const loanHidden = document.getElementById('loanAmountValue');
 
-        loanSlider.setAttribute('aria-valuemin', loanSlider.min);
-        loanSlider.setAttribute('aria-valuemax', loanSlider.max);
+        loanSlider.setAttribute('aria-valuemin', String(parseInt(loanSlider.min, 10)));
+        loanSlider.setAttribute('aria-valuemax', String(parseInt(loanSlider.max, 10)));
 
         const updateLoanDisplay = (value) => {
             const formattedValue = `$${value.toLocaleString()}`;
