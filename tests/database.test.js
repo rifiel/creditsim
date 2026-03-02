@@ -102,7 +102,8 @@ describe('Database module', () => {
     insertedIds.push(inserted.id);
     const customers = await testDb.getAllCustomers();
 
-    expect(customers.find((customer) => customer.id === inserted.id)).toBeDefined();
+    const found = customers.find((customer) => customer.id === inserted.id);
+    expect(found).toEqual(expect.objectContaining(customerData));
   });
 
   test('deleteCustomersByIds removes matching customers', async () => {
@@ -124,6 +125,39 @@ describe('Database module', () => {
 
     const fetched = await testDb.getCustomerById(inserted.id);
     expect(fetched).toBeUndefined();
+  });
+
+  test('deleteCustomersByIds removes multiple customers', async () => {
+    const firstCustomer = {
+      name: 'Database Delete User A',
+      age: 33,
+      annualIncome: 58000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 16000,
+      creditHistory: 'good',
+      score: 675,
+      riskCategory: 'Medium risk'
+    };
+
+    const secondCustomer = {
+      name: 'Database Delete User B',
+      age: 45,
+      annualIncome: 91000,
+      debtToIncomeRatio: 0.2,
+      loanAmount: 22000,
+      creditHistory: 'good',
+      score: 735,
+      riskCategory: 'Medium risk'
+    };
+
+    const firstInserted = await testDb.insertCustomer(firstCustomer);
+    const secondInserted = await testDb.insertCustomer(secondCustomer);
+    insertedIds.push(firstInserted.id, secondInserted.id);
+
+    await testDb.deleteCustomersByIds([firstInserted.id, secondInserted.id]);
+
+    await expect(testDb.getCustomerById(firstInserted.id)).resolves.toBeUndefined();
+    await expect(testDb.getCustomerById(secondInserted.id)).resolves.toBeUndefined();
   });
 
   test('deleteCustomersByIds rejects non-integer ids', async () => {

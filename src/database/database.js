@@ -104,12 +104,12 @@ class Database {
   }
 
   async deleteCustomersByIds(ids) {
-    if (!ids.length) {
-      return Promise.resolve();
-    }
-
     if (!ids.every((id) => Number.isInteger(id))) {
       throw new Error('Customer IDs must be integers');
+    }
+
+    if (!ids.length) {
+      return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
