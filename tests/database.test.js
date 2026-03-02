@@ -78,6 +78,7 @@ describe('Database module', () => {
 
   test('getCustomerById returns undefined for invalid identifiers', async () => {
     await expect(testDb.getCustomerById(undefined)).resolves.toBeUndefined();
+    await expect(testDb.getCustomerById(null)).resolves.toBeUndefined();
     await expect(testDb.getCustomerById('not-a-number')).resolves.toBeUndefined();
   });
 
@@ -98,6 +99,27 @@ describe('Database module', () => {
     const customers = await testDb.getAllCustomers();
 
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
+  });
+
+  test('deleteCustomersByIds removes matching customers', async () => {
+    const customerData = {
+      name: 'Database Delete User',
+      age: 31,
+      annualIncome: 61000,
+      debtToIncomeRatio: 0.26,
+      loanAmount: 14000,
+      creditHistory: 'good',
+      score: 680,
+      riskCategory: 'Medium risk'
+    };
+
+    const inserted = await testDb.insertCustomer(customerData);
+    insertedIds.push(inserted.id);
+
+    await testDb.deleteCustomersByIds([inserted.id]);
+
+    const fetched = await testDb.getCustomerById(inserted.id);
+    expect(fetched).toBeUndefined();
   });
 
   test('deleteCustomersByIds rejects non-integer ids', async () => {
