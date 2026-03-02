@@ -105,7 +105,7 @@ class Database {
 
   async deleteCustomersByIds(ids) {
     if (!ids.length) {
-      return;
+      return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {

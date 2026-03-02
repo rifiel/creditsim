@@ -95,7 +95,7 @@ describe('Database module', () => {
     expect(customers.some((customer) => customer.id === inserted.id)).toBe(true);
   });
 
-  test('close resolves without error when called on unopened database', async () => {
+  test('close handles uninitialized database gracefully', async () => {
     const unopenedDb = new Database();
 
     await expect(unopenedDb.close()).resolves.toBeUndefined();
