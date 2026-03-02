@@ -20,6 +20,9 @@ class CreditSimulator {
         
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
+
+        // Allow switching homepage design variants
+        this.setupVariantSwitcher();
     }
     
     setupLoanSlider() {
@@ -32,6 +35,41 @@ class CreditSimulator {
             const value = parseInt(e.target.value);
             loanDisplay.textContent = `$${value.toLocaleString()}`;
             loanHidden.value = value;
+        });
+    }
+
+    setupVariantSwitcher() {
+        this.variantButtons = Array.from(document.querySelectorAll('.variant-btn'));
+        if (this.variantButtons.length === 0) {
+            return;
+        }
+
+        const availableVariants = this.variantButtons.map((button) => button.dataset.variant);
+        const storedVariant = localStorage.getItem('homepageVariant');
+        const initialVariant = availableVariants.includes(storedVariant) ? storedVariant : availableVariants[0];
+        this.applyVariant(initialVariant);
+        localStorage.setItem('homepageVariant', initialVariant);
+
+        this.variantButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const { variant } = button.dataset;
+                if (!variant) {
+                    return;
+                }
+
+                localStorage.setItem('homepageVariant', variant);
+                this.applyVariant(variant);
+            });
+        });
+    }
+
+    applyVariant(variant) {
+        document.body.setAttribute('data-variant', variant);
+
+        this.variantButtons.forEach((button) => {
+            const isActive = button.dataset.variant === variant;
+            button.classList.toggle('active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         });
     }
     
