@@ -332,11 +332,18 @@ class FootballSection {
       : `<div class="team-logo-placeholder me-3">⚽</div>`;
 
     const formHtml = (team.recentMatches || []).map((m) => {
-      const result = m.score
-        ? (m.homeTeam === team.name
-            ? (parseInt(m.score) > parseInt(m.score.split('-')[1]) ? 'W' : parseInt(m.score) === parseInt(m.score.split('-')[1]) ? 'D' : 'L')
-            : 'D')
-        : '?';
+      let result = '?';
+      if (m.score) {
+        const parts = m.score.split('-');
+        const homeGoals = parseInt(parts[0], 10);
+        const awayGoals = parseInt(parts[1], 10);
+        const isHome = m.homeTeam === team.name;
+        const teamGoals = isHome ? homeGoals : awayGoals;
+        const opponentGoals = isHome ? awayGoals : homeGoals;
+        if (teamGoals > opponentGoals) result = 'W';
+        else if (teamGoals === opponentGoals) result = 'D';
+        else result = 'L';
+      }
       return `<span class="form-badge ${result}" title="${this._esc(m.homeTeam)} vs ${this._esc(m.awayTeam)} ${m.score || ''}">${result}</span>`;
     }).join(' ');
 

@@ -50,7 +50,6 @@ async function fetchWithRetry(url, options, attempt = 0) {
     }
 
     if (!response.ok) {
-      const body = await response.text().catch(() => '');
       throw new ProviderError(
         `Provider returned HTTP ${response.status}`,
         'UPSTREAM',
