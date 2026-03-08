@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const path = require('path');
 const { initializeDatabase } = require('./database/database');
 const simulationRoutes = require('./routes/simulation');
+const footballRoutes = require('./routes/football');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +33,20 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/api', simulationRoutes);
+
+// Football section (feature-flagged)
+if (process.env.FOOTBALL_SECTION_ENABLED === 'true') {
+  app.use('/api/football', footballRoutes);
+  app.get('/football', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+  app.get('/football/teams/:teamId', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+  app.get('/football/players/:playerId', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+}
 
 // Serve the HTML form at root
 app.get('/', (req, res) => {

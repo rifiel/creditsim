@@ -10,6 +10,7 @@ info:
     - Calculate credit scores using rule-based logic
     - Store and retrieve simulation history
     - Get scoring criteria explanations
+    - Football section: news, results, fixtures, standings, team & player details (requires `FOOTBALL_SECTION_ENABLED=true`)
     
     ## Scoring Logic
     The scoring algorithm starts with a base score of 600 and applies adjustments based on:
@@ -201,8 +202,342 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
 
+  /football/summary:
+    get:
+      summary: Football landing summary
+      description: |
+        Returns featured competitions, today's fixture snippets, today's result snippets,
+        and top news headlines for the football landing page.
+        Requires `FOOTBALL_SECTION_ENABLED=true`.
+      operationId: getFootballSummary
+      tags:
+        - Football
+      parameters:
+        - $ref: '#/components/parameters/CompetitionIdOptional'
+      responses:
+        '200':
+          description: Landing summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: Upstream football data provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/news:
+    get:
+      summary: Football news articles
+      description: Returns a paginated list of football news articles, optionally filtered by competition and date range.
+      operationId: getFootballNews
+      tags:
+        - Football
+      parameters:
+        - $ref: '#/components/parameters/CompetitionIdOptional'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: News articles retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/results:
+    get:
+      summary: Match results
+      description: Returns finished matches, optionally filtered by competition and date range.
+      operationId: getFootballResults
+      tags:
+        - Football
+      parameters:
+        - $ref: '#/components/parameters/CompetitionIdOptional'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Match results retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/fixtures:
+    get:
+      summary: Upcoming fixtures
+      description: Returns scheduled/upcoming matches, optionally filtered by competition and date range.
+      operationId: getFootballFixtures
+      tags:
+        - Football
+      parameters:
+        - $ref: '#/components/parameters/CompetitionIdOptional'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Fixtures retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/standings:
+    get:
+      summary: Competition standings
+      description: Returns the standings table for the given competition. `competitionId` is required.
+      operationId: getFootballStandings
+      tags:
+        - Football
+      parameters:
+        - name: competitionId
+          in: query
+          required: true
+          description: Competition identifier (e.g. `PL` for Premier League)
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 50
+          example: PL
+      responses:
+        '200':
+          description: Standings table retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error (missing or invalid competitionId)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/teams/{teamId}:
+    get:
+      summary: Team detail
+      description: Returns team profile including competitions, recent form, and squad summary.
+      operationId: getFootballTeam
+      tags:
+        - Football
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: Team identifier (1–64 alphanumeric / underscore / hyphen characters)
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{1,64}$'
+          example: '57'
+      responses:
+        '200':
+          description: Team profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /football/players/{playerId}:
+    get:
+      summary: Player detail
+      description: Returns player profile including identity, current team, position, and nationality.
+      operationId: getFootballPlayer
+      tags:
+        - Football
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          description: Player identifier (1–64 alphanumeric / underscore / hyphen characters)
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{1,64}$'
+          example: '8004'
+      responses:
+        '200':
+          description: Player profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FootballResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Player not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
+  parameters:
+    CompetitionIdOptional:
+      name: competitionId
+      in: query
+      required: false
+      description: Competition identifier (e.g. `PL` for Premier League)
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 50
+      example: PL
+    FromDate:
+      name: from
+      in: query
+      required: false
+      description: Start date filter (ISO 8601)
+      schema:
+        type: string
+        format: date
+      example: '2026-03-01'
+    ToDate:
+      name: to
+      in: query
+      required: false
+      description: End date filter (ISO 8601)
+      schema:
+        type: string
+        format: date
+      example: '2026-03-31'
+    Date:
+      name: date
+      in: query
+      required: false
+      description: Exact date filter (ISO 8601)
+      schema:
+        type: string
+        format: date
+      example: '2026-03-08'
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Maximum number of items to return (1–50)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+      example: 10
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: Number of items to skip (0–10000)
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 10000
+      example: 0
+
   schemas:
+    FootballResponse:
+      type: object
+      description: Standard envelope for all football API responses
+      properties:
+        data:
+          type: object
+          description: Response payload (shape depends on endpoint)
+        message:
+          type: string
+          example: OK
+        metadata:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              example: '2026-03-08T00:00:00Z'
+            version:
+              type: string
+              example: '1.0'
+
     CustomerInput:
       type: object
       required:
@@ -489,3 +824,9 @@ tags:
     description: Operations for getting system information
   - name: System
     description: System health and status operations
+  - name: Football
+    description: |
+      Football section endpoints. All routes under `/football` are only registered
+      when the `FOOTBALL_SECTION_ENABLED` environment variable is set to `true`.
+      Data is sourced from an external football data provider; API key configured
+      via `FOOTBALL_API_KEY` environment variable.
