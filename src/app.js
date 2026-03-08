@@ -2,8 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const { initializeDatabase } = require('./database/database');
 const simulationRoutes = require('./routes/simulation');
+const footballRoutes = require('./routes/football');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +34,38 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/api', simulationRoutes);
+
+// Football section (feature-flagged)
+if (process.env.FOOTBALL_SECTION_ENABLED === 'true') {
+  // Rate limiter for football API endpoints (mitigate scraping)
+  const footballApiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+  });
+
+  // Rate limiter for football HTML pages
+  const footballPageLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+  });
+
+  app.use('/api/football', footballApiLimiter, footballRoutes);
+  app.get('/football', footballPageLimiter, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+  app.get('/football/teams/:teamId', footballPageLimiter, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+  app.get('/football/players/:playerId', footballPageLimiter, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/football.html'));
+  });
+}
 
 // Serve the HTML form at root
 app.get('/', (req, res) => {
