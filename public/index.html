@@ -3,209 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Risk Simulator</title>
+    <meta name="description" content="Credit Risk Simulator – instantly evaluate credit risk with a lightweight, easy-to-use simulation tool.">
+    <title>Welcome – Credit Risk Simulator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .score-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .low-risk { border-left: 5px solid #28a745; }
-        .medium-risk { border-left: 5px solid #ffc107; }
-        .high-risk { border-left: 5px solid #dc3545; }
-        .score-number {
-            font-size: 3rem;
-            font-weight: bold;
-        }
-        .simulation-item {
-            transition: transform 0.2s;
-        }
-        .simulation-item:hover {
-            transform: translateY(-2px);
-        }
-        
-        /* Enhanced range slider styling */
-        .form-range {
-            height: 6px;
-        }
-        .form-range::-webkit-slider-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .form-range::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .form-range:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-    </style>
+    <link href="styles/welcome.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-calculator"></i> Credit Risk Simulator
-            </a>
-            <span class="navbar-text">
-                Demo Application - Not for Production Use
-            </span>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Input Form -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-person-plus"></i> Customer Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="creditForm">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="age" class="form-label">Age</label>
-                                        <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="annualIncome" class="form-label">Annual Income ($)</label>
-                                        <input type="number" class="form-control" id="annualIncome" name="annualIncome" min="0" step="any" required>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
-                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" required>
-                                        <div class="form-text">Enter as decimal (e.g., 0.3 for 30%)</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="loanAmount" class="form-label">Loan Amount</label>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">$5,000</span>
-                                            <span id="loanAmountDisplay" class="fw-bold text-primary">$15,000</span>
-                                            <span class="text-muted">$25,000</span>
-                                        </div>
-                                        <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
-                                               min="5000" max="25000" step="1000" value="15000" required>
-                                        <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="creditHistory" class="form-label">Credit History</label>
-                                <select class="form-select" id="creditHistory" name="creditHistory" required>
-                                    <option value="">Select...</option>
-                                    <option value="good">Good</option>
-                                    <option value="bad">Bad</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-calculator"></i> Calculate Credit Score
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results -->
-            <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up"></i> Credit Score Result
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div id="scoreNumber" class="score-number"></div>
-                        <div id="riskCategory" class="badge fs-6 mb-3"></div>
-                        <div id="customerName" class="text-muted"></div>
-                        <hr>
-                        <div class="row text-start">
-                            <div class="col-6">
-                                <small class="text-muted">Loan Amount:</small><br>
-                                <span id="resultLoanAmount"></span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Annual Income:</small><br>
-                                <span id="resultIncome"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="errorCard" class="card border-danger d-none">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Error
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="errorMessage"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Previous Simulations -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-clock-history"></i> Previous Simulations
-                        </h5>
-                        <button class="btn btn-outline-primary btn-sm" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="simulationsList">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-hourglass-split"></i> Loading...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ═══════════════════════════════════════════════════════
+         HEADER – branding / site identity
+    ═══════════════════════════════════════════════════════ -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Site navigation">
+            <div class="container">
+                <!-- Brand: icon + text so identity is clear even if CSS fails -->
+                <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                    <i class="bi bi-calculator fs-4" aria-hidden="true"></i>
+                    <span>Credit Risk Simulator</span>
+                </a>
 
-    <footer class="bg-dark text-light text-center py-3 mt-5">
+                <!-- Optional: quick-jump nav links -->
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/simulator">Simulator</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/api/scoring-criteria">Scoring Criteria</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/api/health">API Health</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════════════════════ -->
+    <main id="main-content">
+
+        <!-- Hero / welcome section -->
+        <section class="hero-section text-center" aria-labelledby="welcome-heading">
+            <div class="container">
+                <!-- Brand identity (logo + site name) -->
+                <div class="mb-3">
+                    <!-- Icon serves as the logo; alt text on the surrounding text identifies the brand -->
+                    <i class="bi bi-shield-check brand-logo d-block mx-auto mb-2" aria-hidden="true"></i>
+                    <span class="site-name text-white-50">Credit Risk Simulator</span>
+                </div>
+
+                <!-- Primary welcome headline (single H1 on this page) -->
+                <h1 id="welcome-heading" class="mb-3">
+                    Welcome to Credit Risk Simulator
+                </h1>
+
+                <!-- Supporting tagline / description -->
+                <p class="tagline mx-auto mb-4">
+                    Instantly evaluate simulated credit risk scores using a transparent,
+                    rules-based model — great for learning and demonstration purposes.
+                </p>
+
+                <!-- Primary call-to-action buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="/simulator" class="btn btn-light btn-hero fw-semibold">
+                        <i class="bi bi-calculator me-2" aria-hidden="true"></i>Run a Simulation
+                    </a>
+                    <a href="/api/scoring-criteria" class="btn btn-outline-light btn-hero">
+                        <i class="bi bi-info-circle me-2" aria-hidden="true"></i>View Scoring Criteria
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature / navigation cards -->
+        <section class="section-features" aria-labelledby="features-heading">
+            <div class="container">
+                <h2 id="features-heading" class="text-center mb-4 fs-4 fw-semibold text-secondary">
+                    What can you do here?
+                </h2>
+
+                <nav aria-label="Main sections">
+                    <div class="row g-3 justify-content-center">
+
+                        <!-- Card 1: Simulator -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a href="/simulator" class="nav-card h-100" aria-label="Open the Credit Risk Simulator">
+                                <div class="nav-card-icon">
+                                    <i class="bi bi-calculator" aria-hidden="true"></i>
+                                </div>
+                                <div class="nav-card-title">Credit Simulator</div>
+                                <p class="nav-card-desc">
+                                    Enter customer data and receive an instant simulated credit
+                                    score with a risk category.
+                                </p>
+                            </a>
+                        </div>
+
+                        <!-- Card 2: Previous Simulations -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a href="/simulator#history" class="nav-card h-100" aria-label="View previous simulations">
+                                <div class="nav-card-icon">
+                                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                </div>
+                                <div class="nav-card-title">Simulation History</div>
+                                <p class="nav-card-desc">
+                                    Browse all previously run simulations stored in the local
+                                    database.
+                                </p>
+                            </a>
+                        </div>
+
+                        <!-- Card 3: Scoring Criteria -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a href="/api/scoring-criteria" class="nav-card h-100" aria-label="Read the scoring criteria">
+                                <div class="nav-card-icon">
+                                    <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                                </div>
+                                <div class="nav-card-title">Scoring Criteria</div>
+                                <p class="nav-card-desc">
+                                    Understand the rules and weights behind every credit score
+                                    calculation.
+                                </p>
+                            </a>
+                        </div>
+
+                        <!-- Card 4: API Health -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <a href="/api/health" class="nav-card h-100" aria-label="Check API health status">
+                                <div class="nav-card-icon">
+                                    <i class="bi bi-heart-pulse" aria-hidden="true"></i>
+                                </div>
+                                <div class="nav-card-title">API Health</div>
+                                <p class="nav-card-desc">
+                                    Check the current status and uptime of the backend API
+                                    service.
+                                </p>
+                            </a>
+                        </div>
+
+                    </div>
+                </nav>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════════════════════ -->
+    <footer class="welcome-footer text-center">
         <div class="container">
-            <small>
-                <i class="bi bi-info-circle"></i> 
-                This is a demonstration application. Do not use for actual credit decisions.
-            </small>
+            <p class="mb-1">
+                <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>
+                This is a demonstration application. Do <strong>not</strong> use for actual credit decisions.
+            </p>
+            <p class="mb-0">
+                <a href="/api/health">API Status</a>
+                &nbsp;·&nbsp;
+                <a href="https://getbootstrap.com" rel="noopener noreferrer" target="_blank">Bootstrap 5</a>
+                &nbsp;·&nbsp;
+                <span id="footer-year"></span> Credit Risk Simulator
+            </p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
+    <script src="welcome.js"></script>
 </body>
 </html>

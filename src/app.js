@@ -33,9 +33,14 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Routes
 app.use('/api', simulationRoutes);
 
-// Serve the HTML form at root
+// Serve the welcome page at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Serve the simulator application
+app.get('/simulator', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/simulator.html'));
 });
 
 // Global error handler
