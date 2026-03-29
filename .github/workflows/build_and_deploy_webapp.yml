@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - rifiel-creditsim-france
 on:
   push:
     branches:
-      - demo
+      - main
   workflow_dispatch:
 
 jobs:
