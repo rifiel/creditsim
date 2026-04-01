@@ -9,7 +9,7 @@
         "type": "promptString",
         "id": "db_path",
         "description": "SQLite Database Path",
-        "default": "${workspaceFolder}/data/creditsim.db"
+        "default": "data/creditsim.db"
       }
    ],
    "servers": {
