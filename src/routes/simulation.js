@@ -99,14 +99,35 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
 
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get all previous simulations with pagination support
+ * Query params: page (default 1), limit (default 3)
  */
 router.get('/simulations', async (req, res) => {
   try {
-    const simulations = await database.getAllCustomers();
+    // Parse pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 3;
+    
+    // Validate parameters
+    if (page < 1 || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: 'Invalid pagination parameters',
+        message: 'Page must be >= 1 and limit must be between 1 and 100'
+      });
+    }
+    
+    // Fetch paginated data and total count in parallel
+    const [simulations, total] = await Promise.all([
+      database.getCustomersPaginated(page, limit),
+      database.countCustomers()
+    ]);
+    
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / limit);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
     
     res.json({
-      count: simulations.length,
       simulations: simulations.map(sim => ({
         id: sim.id,
         name: sim.name,
@@ -114,7 +135,15 @@ router.get('/simulations', async (req, res) => {
         riskCategory: sim.riskCategory,
         loanAmount: sim.loanAmount,
         createdAt: sim.createdAt
-      }))
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext,
+        hasPrev
+      }
     });
     
   } catch (error) {

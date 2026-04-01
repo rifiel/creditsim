@@ -8,15 +8,27 @@ class CreditSimulator {
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
         
+        // Pagination state
+        this.currentPage = this.getPageFromUrl();
+        this.pageSize = 3; // Fixed at 3 items per page
+        this.totalPages = 1;
+        this.paginationData = null;
+        
         this.init();
     }
     
     init() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
-        this.refreshBtn.addEventListener('click', this.loadSimulations.bind(this));
+        this.refreshBtn.addEventListener('click', () => this.loadSimulations(this.currentPage));
+        
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', () => {
+            this.currentPage = this.getPageFromUrl();
+            this.loadSimulations(this.currentPage);
+        });
         
         // Load previous simulations on page load
-        this.loadSimulations();
+        this.loadSimulations(this.currentPage);
         
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
@@ -45,7 +57,8 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            // Go to page 1 after new submission (newest first)
+            this.goToPage(1);
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -99,16 +112,25 @@ class CreditSimulator {
         return result;
     }
     
-    async loadSimulations() {
+    async loadSimulations(page = 1) {
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${page}&limit=${this.pageSize}`);
             const data = await response.json();
             
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to load simulations');
             }
             
+            // Store pagination data
+            this.paginationData = data.pagination;
+            this.totalPages = data.pagination.totalPages;
+            this.currentPage = data.pagination.page;
+            
+            // Update URL without reload
+            this.updateUrl(this.currentPage);
+            
             this.renderSimulations(data.simulations);
+            this.renderPagination();
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
@@ -116,6 +138,11 @@ class CreditSimulator {
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
+            // Hide pagination on error
+            const paginationControls = document.getElementById('paginationControls');
+            if (paginationControls) {
+                paginationControls.style.display = 'none';
+            }
         }
     }
     
@@ -243,6 +270,100 @@ class CreditSimulator {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+    
+    getPageFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = parseInt(urlParams.get('page')) || 1;
+        return page > 0 ? page : 1;
+    }
+    
+    updateUrl(page) {
+        const url = new URL(window.location);
+        if (page === 1) {
+            url.searchParams.delete('page');
+        } else {
+            url.searchParams.set('page', page);
+        }
+        window.history.pushState({}, '', url);
+    }
+    
+    goToPage(page) {
+        if (page < 1 || (this.totalPages > 0 && page > this.totalPages)) {
+            return;
+        }
+        this.currentPage = page;
+        this.loadSimulations(page);
+    }
+    
+    renderPagination() {
+        const paginationControls = document.getElementById('paginationControls');
+        if (!paginationControls || !this.paginationData) {
+            return;
+        }
+        
+        const { page, totalPages, hasNext, hasPrev, total } = this.paginationData;
+        
+        // Hide pagination if only one page or no results
+        if (totalPages <= 1) {
+            paginationControls.style.display = 'none';
+            return;
+        }
+        
+        paginationControls.style.display = 'flex';
+        
+        let paginationHtml = '<nav aria-label="Simulation pages"><ul class="pagination mb-0">';
+        
+        // Previous button
+        paginationHtml += `
+            <li class="page-item ${!hasPrev ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${page - 1}" ${!hasPrev ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+        `;
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            // Show first page, last page, current page, and pages around current
+            if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+                paginationHtml += `
+                    <li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">
+                            ${i}
+                            ${i === page ? '<span class="visually-hidden">(current)</span>' : ''}
+                        </a>
+                    </li>
+                `;
+            } else if (i === page - 3 || i === page + 3) {
+                // Show ellipsis
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+        
+        // Next button
+        paginationHtml += `
+            <li class="page-item ${!hasNext ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${page + 1}" ${!hasNext ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        `;
+        
+        paginationHtml += '</ul></nav>';
+        
+        paginationControls.innerHTML = paginationHtml;
+        
+        // Add click handlers to pagination links
+        paginationControls.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetPage = parseInt(e.currentTarget.dataset.page);
+                if (targetPage && !e.currentTarget.closest('.disabled')) {
+                    this.goToPage(targetPage);
+                }
+            });
+        });
     }
 }
 
