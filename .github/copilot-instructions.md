@@ -4,6 +4,8 @@ User experience is crucial. Think Apple products. Use bootstrap 5 and javascript
 
 If you're unsure about a code suggestion, ask for clarification or more details. It's better to ask than to assume.
 
+The database is SQLite and stored in `data/creditsim.db` file. Do not create a new database or use a different one. Always interact with the existing database, unless asked explicitly to do otherwise.
+
 When the user asks something about Azure DevOps, make sure you are prioritizing the MCP Server for Azure DevOps.
 When the user asks something about the database, make sure you are prioritizing the MCP Server for SQLite.
 

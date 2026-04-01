@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const { seedIfNeeded } = require('./seed');
 
 const DB_PATH = path.join(__dirname, '../../data/creditsim.db');
 
@@ -103,6 +104,18 @@ class Database {
     });
   }
 
+  async countCustomers() {
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT COUNT(*) AS count FROM customers', [], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row.count);
+        }
+      });
+    });
+  }
+
   async close() {
     return new Promise((resolve, reject) => {
       if (this.db) {
@@ -129,6 +142,7 @@ async function initializeDatabase() {
   try {
     await database.connect();
     await database.createTables();
+    await seedIfNeeded(database);
     return database;
   } catch (error) {
     console.error('Database initialization failed:', error);
