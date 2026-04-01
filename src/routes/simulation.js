@@ -5,6 +5,8 @@ const { calculateCreditScore, getScoringCriteria } = require('../services/credit
 
 const router = express.Router();
 
+const PAGE_SIZE = 3;
+
 // Validation middleware
 const validateCustomerData = [
   body('name')
@@ -99,14 +101,23 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
 
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get paginated previous simulations
  */
 router.get('/simulations', async (req, res) => {
   try {
-    const simulations = await database.getAllCustomers();
-    
+    let page = parseInt(req.query.page, 10);
+    if (!Number.isInteger(page) || page < 1) page = 1;
+
+    const offset = (page - 1) * PAGE_SIZE;
+
+    const [total, simulations] = await Promise.all([
+      database.countCustomers(),
+      database.getCustomersPaginated(PAGE_SIZE, offset)
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
     res.json({
-      count: simulations.length,
       simulations: simulations.map(sim => ({
         id: sim.id,
         name: sim.name,
@@ -114,9 +125,15 @@ router.get('/simulations', async (req, res) => {
         riskCategory: sim.riskCategory,
         loanAmount: sim.loanAmount,
         createdAt: sim.createdAt
-      }))
+      })),
+      pagination: {
+        total,
+        page,
+        pageSize: PAGE_SIZE,
+        totalPages
+      }
     });
-    
+
   } catch (error) {
     console.error('Error in /simulations:', error);
     res.status(500).json({

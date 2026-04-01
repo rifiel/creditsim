@@ -89,6 +89,25 @@ class Database {
     });
   }
 
+  async getCustomersPaginated(limit, offset) {
+    return new Promise((resolve, reject) => {
+      const selectSQL = `
+        SELECT id, name, score, riskCategory, loanAmount, createdAt
+        FROM customers
+        ORDER BY createdAt DESC
+        LIMIT ? OFFSET ?
+      `;
+      this.db.all(selectSQL, [limit, offset], (err, rows) => {
+        if (err) {
+          console.error('Error fetching customers:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   async getCustomerById(id) {
     return new Promise((resolve, reject) => {
       const selectSQL = 'SELECT * FROM customers WHERE id = ?';

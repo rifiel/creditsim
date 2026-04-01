@@ -7,16 +7,20 @@ class CreditSimulator {
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
+        this.currentPage = 1;
         
         this.init();
     }
     
     init() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
-        this.refreshBtn.addEventListener('click', this.loadSimulations.bind(this));
+        this.refreshBtn.addEventListener('click', () => {
+            this.currentPage = 1;
+            this.loadSimulations(1);
+        });
         
         // Load previous simulations on page load
-        this.loadSimulations();
+        this.loadSimulations(1);
         
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
@@ -45,7 +49,8 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            this.currentPage = 1;
+            this.loadSimulations(1); // Refresh the list, reset to page 1
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -99,9 +104,10 @@ class CreditSimulator {
         return result;
     }
     
-    async loadSimulations() {
+    async loadSimulations(page = this.currentPage) {
+        this.currentPage = page;
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${page}`);
             const data = await response.json();
             
             if (!response.ok) {
@@ -109,6 +115,7 @@ class CreditSimulator {
             }
             
             this.renderSimulations(data.simulations);
+            this.renderPagination(data.pagination);
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
@@ -116,7 +123,62 @@ class CreditSimulator {
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
+            const paginationContainer = document.getElementById('pagination-container');
+            if (paginationContainer) paginationContainer.innerHTML = '';
         }
+    }
+
+    renderPagination(pagination) {
+        const container = document.getElementById('pagination-container');
+        if (!container) return;
+
+        if (!pagination || pagination.totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const { page, totalPages } = pagination;
+        const items = [];
+
+        items.push(`
+            <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                <button class="page-link" data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </li>
+        `);
+
+        for (let i = 1; i <= totalPages; i++) {
+            items.push(`
+                <li class="page-item ${i === page ? 'active' : ''}">
+                    <button class="page-link" data-page="${i}">${i}</button>
+                </li>
+            `);
+        }
+
+        items.push(`
+            <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                <button class="page-link" data-page="${page + 1}" ${page === totalPages ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </li>
+        `);
+
+        container.innerHTML = `
+            <nav aria-label="Simulation history pagination">
+                <ul class="pagination mb-0">
+                    ${items.join('')}
+                </ul>
+            </nav>
+        `;
+
+        container.querySelectorAll('.page-link:not([disabled])').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetPage = parseInt(btn.dataset.page, 10);
+                this.currentPage = targetPage;
+                this.loadSimulations(targetPage);
+            });
+        });
     }
     
     renderSimulations(simulations) {

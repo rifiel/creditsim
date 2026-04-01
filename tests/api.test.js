@@ -90,29 +90,35 @@ describe('API Endpoints', () => {
   });
 
   describe('GET /api/simulations', () => {
-    test('should return list of simulations', async () => {
+    const simulationData = {
+      name: 'Pagination Test User',
+      age: 30,
+      annualIncome: 50000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 10000,
+      creditHistory: 'good'
+    };
+
+    test('should return paginated list of simulations', async () => {
       const response = await request(app)
         .get('/api/simulations')
         .expect(200);
 
-      expect(response.body).toHaveProperty('count');
       expect(response.body).toHaveProperty('simulations');
+      expect(response.body).toHaveProperty('pagination');
       expect(Array.isArray(response.body.simulations)).toBe(true);
-      expect(typeof response.body.count).toBe('number');
+
+      const { pagination } = response.body;
+      expect(pagination).toHaveProperty('total');
+      expect(pagination).toHaveProperty('page');
+      expect(pagination).toHaveProperty('pageSize');
+      expect(pagination).toHaveProperty('totalPages');
+      expect(typeof pagination.total).toBe('number');
+      expect(pagination.pageSize).toBe(3);
     });
 
     test('should return simulations in correct format', async () => {
-      // First create a simulation
-      await request(app)
-        .post('/api/simulate')
-        .send({
-          name: 'Test User',
-          age: 30,
-          annualIncome: 50000,
-          debtToIncomeRatio: 0.4,
-          loanAmount: 20000,
-          creditHistory: 'good'
-        });
+      await request(app).post('/api/simulate').send(simulationData);
 
       const response = await request(app)
         .get('/api/simulations')
@@ -126,6 +132,44 @@ describe('API Endpoints', () => {
         expect(simulation).toHaveProperty('riskCategory');
         expect(simulation).toHaveProperty('loanAmount');
         expect(simulation).toHaveProperty('createdAt');
+      }
+    });
+
+    test('should return at most 3 simulations per page', async () => {
+      const response = await request(app)
+        .get('/api/simulations?page=1')
+        .expect(200);
+
+      expect(response.body.simulations.length).toBeLessThanOrEqual(3);
+    });
+
+    test('should return non-overlapping results for page 1 and page 2', async () => {
+      // Ensure at least 4 records exist
+      for (let i = 0; i < 4; i++) {
+        await request(app).post('/api/simulate').send({ ...simulationData, name: `Paging User ${i}` });
+      }
+
+      const [page1, page2] = await Promise.all([
+        request(app).get('/api/simulations?page=1').expect(200),
+        request(app).get('/api/simulations?page=2').expect(200)
+      ]);
+
+      expect(page1.body.simulations.length).toBe(3);
+      expect(page2.body.simulations.length).toBeGreaterThanOrEqual(1);
+
+      const page1Ids = page1.body.simulations.map(s => s.id);
+      const page2Ids = page2.body.simulations.map(s => s.id);
+      expect(page1Ids.some(id => page2Ids.includes(id))).toBe(false);
+    });
+
+    test('should default to page 1 for invalid page values', async () => {
+      const page1Response = await request(app).get('/api/simulations?page=1').expect(200);
+      const page1Ids = page1Response.body.simulations.map(s => s.id);
+
+      for (const badPage of ['0', '-1', 'abc']) {
+        const response = await request(app).get(`/api/simulations?page=${badPage}`).expect(200);
+        expect(response.body.pagination.page).toBe(1);
+        expect(response.body.simulations.map(s => s.id)).toEqual(page1Ids);
       }
     });
   });
