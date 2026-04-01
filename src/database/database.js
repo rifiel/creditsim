@@ -89,6 +89,26 @@ class Database {
     });
   }
 
+  async getCustomersPaginated(page = 1, limit = 3) {
+    return new Promise((resolve, reject) => {
+      // Validate and sanitize inputs
+      const pageNum = Math.max(1, parseInt(page) || 1);
+      const limitNum = Math.max(1, Math.min(100, parseInt(limit) || 3)); // Max 100 items per page
+      const offset = (pageNum - 1) * limitNum;
+      
+      const selectSQL = 'SELECT * FROM customers ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+      
+      this.db.all(selectSQL, [limitNum, offset], (err, rows) => {
+        if (err) {
+          console.error('Error fetching paginated customers:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   async getCustomerById(id) {
     return new Promise((resolve, reject) => {
       const selectSQL = 'SELECT * FROM customers WHERE id = ?';
