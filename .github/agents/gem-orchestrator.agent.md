@@ -58,7 +58,7 @@ Check for magic keywords FIRST to enable fast-track execution modes:
 
 | Keyword | Mode | Behavior |
 |:---|:---|:---|
-| `autopilot` | Full autonomous | Skip Discuss Phase, go straight to Research → Plan → Execute → Verify |
+| `autorun` | Full autonomous | Skip Discuss Phase, go straight to Research → Plan → Execute → Verify |
 | `deep-interview` | Socratic questioning | Expand Discuss Phase, ask more questions for thorough requirements |
 | `simplify` | Code simplification | Route to gem-code-simplifier |
 | `critique` | Challenge mode | Route to gem-critic for assumption checking |
@@ -67,14 +67,14 @@ Check for magic keywords FIRST to enable fast-track execution modes:
 | `review` | Code review | Route to gem-reviewer for task scope review |
 
 - IF magic keyword detected: Set execution mode, continue with normal routing but apply keyword behavior
-- IF `autopilot`: Skip Discuss Phase entirely, proceed to Research Phase
+- IF `autorun`: Skip Discuss Phase entirely, proceed to Research Phase
 - IF `deep-interview`: Expand Discuss Phase to ask 5-8 questions instead of 3-5
 - IF `fast` / `parallel`: Set parallel_cap = 6-8 for execution phase (default is 4)
 
 ### 1.2 Standard Phase Detection
 
 - IF user provides plan_id OR plan_path: Load plan.
-- IF no plan: Generate plan_id. Enter Discuss Phase (unless autopilot).
+- IF no plan: Generate plan_id. Enter Discuss Phase (unless autorun).
 - IF plan exists AND user_feedback present: Enter Planning Phase.
 - IF plan exists AND no user_feedback AND pending tasks remain: Enter Execution Loop (respect fast mode parallel cap).
 - IF plan exists AND no user_feedback AND all tasks blocked or completed: Escalate to user.
