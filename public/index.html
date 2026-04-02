@@ -1,211 +1,1320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Risk Simulator</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .score-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .low-risk { border-left: 5px solid #28a745; }
-        .medium-risk { border-left: 5px solid #ffc107; }
-        .high-risk { border-left: 5px solid #dc3545; }
-        .score-number {
-            font-size: 3rem;
-            font-weight: bold;
-        }
-        .simulation-item {
-            transition: transform 0.2s;
-        }
-        .simulation-item:hover {
-            transform: translateY(-2px);
-        }
-        
-        /* Enhanced range slider styling */
-        .form-range {
-            height: 6px;
-        }
-        .form-range::-webkit-slider-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .form-range::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .form-range:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-calculator"></i> Credit Risk Simulator
-            </a>
-            <span class="navbar-text">
-                Demo Application - Not for Production Use
-            </span>
-        </div>
-    </nav>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreditSim — Credit Risk Intelligence</title>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Input Form -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-person-plus"></i> Customer Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="creditForm">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="age" class="form-label">Age</label>
-                                        <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="annualIncome" class="form-label">Annual Income ($)</label>
-                                        <input type="number" class="form-control" id="annualIncome" name="annualIncome" min="0" step="any" required>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
-                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" required>
-                                        <div class="form-text">Enter as decimal (e.g., 0.3 for 30%)</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="loanAmount" class="form-label">Loan Amount</label>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">$5,000</span>
-                                            <span id="loanAmountDisplay" class="fw-bold text-primary">$15,000</span>
-                                            <span class="text-muted">$25,000</span>
-                                        </div>
-                                        <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
-                                               min="5000" max="25000" step="1000" value="15000" required>
-                                        <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="creditHistory" class="form-label">Credit History</label>
-                                <select class="form-select" id="creditHistory" name="creditHistory" required>
-                                    <option value="">Select...</option>
-                                    <option value="good">Good</option>
-                                    <option value="bad">Bad</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-calculator"></i> Calculate Credit Score
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results -->
-            <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up"></i> Credit Score Result
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div id="scoreNumber" class="score-number"></div>
-                        <div id="riskCategory" class="badge fs-6 mb-3"></div>
-                        <div id="customerName" class="text-muted"></div>
-                        <hr>
-                        <div class="row text-start">
-                            <div class="col-6">
-                                <small class="text-muted">Loan Amount:</small><br>
-                                <span id="resultLoanAmount"></span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Annual Income:</small><br>
-                                <span id="resultIncome"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="errorCard" class="card border-danger d-none">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Error
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="errorMessage"></div>
-                    </div>
-                </div>
-            </div>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3.0 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons 1.10.0 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    /* ===========================================
+       BASE
+    =========================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===========================================
+       BOOTSTRAP GRID & UTILITY FALLBACKS
+       (ensures layout works if CDN is unavailable)
+    =========================================== */
+    .container {
+      width: 100%;
+      padding-right: 12px;
+      padding-left: 12px;
+      margin-right: auto;
+      margin-left: auto;
+      max-width: 1200px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-right: -12px;
+      margin-left: -12px;
+    }
+    .row > * {
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 100%;
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+    .g-4 > * { padding: 12px; }
+    @media (min-width: 768px) {
+      .col-md-6 { flex: 0 0 auto; width: 50%; }
+    }
+    @media (min-width: 992px) {
+      .col-lg-4 { flex: 0 0 auto; width: 33.33333%; }
+      .col-lg-5 { flex: 0 0 auto; width: 41.66667%; }
+      .col-lg-7 { flex: 0 0 auto; width: 58.33333%; }
+      .col-lg-8 { flex: 0 0 auto; width: 66.66667%; }
+    }
+    @media (min-width: 1200px) {
+      .col-xl-3 { flex: 0 0 auto; width: 25%; }
+    }
+    .align-items-start  { align-items: flex-start !important; }
+    .align-items-center { align-items: center !important; }
+    .justify-content-between { justify-content: space-between !important; }
+    .d-flex { display: flex !important; }
+    .d-none { display: none !important; }
+    .mb-0 { margin-bottom: 0 !important; }
+    .mb-3 { margin-bottom: 1rem !important; }
+    .mt-4 { margin-top: 1.5rem !important; }
+    .h-100 { height: 100% !important; }
+    .form-control, .form-select, .form-range { display: block; width: 100%; }
+    .alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+
+    /* ===========================================
+       NAVBAR
+    =========================================== */
+    .navbar-fintech {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      padding: 0.875rem 0;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-text { line-height: 1.2; }
+
+    .brand-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.4px;
+    }
+
+    .brand-name em {
+      font-style: normal;
+      color: #60a5fa;
+    }
+
+    .brand-sub {
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .nav-pill {
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: #93c5fd;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ===========================================
+       HERO
+    =========================================== */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+      padding: 3.25rem 0 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 60%, rgba(59,130,246,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(99,102,241,0.12) 0%, transparent 45%);
+      pointer-events: none;
+    }
+
+    /* subtle dot-grid texture */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.25);
+      color: #93c5fd;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 5px 13px;
+      border-radius: 20px;
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1.5px;
+      line-height: 1.08;
+      margin: 0 0 0.85rem;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 1rem;
+      font-weight: 400;
+      max-width: 480px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 0;
+      margin-top: 2.25rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.6rem 1.2rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.78);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .hero-stat:first-child { border-radius: 8px 0 0 8px; }
+    .hero-stat:last-child  { border-radius: 0 8px 8px 0; }
+    .hero-stat + .hero-stat { border-left: none; }
+
+    .hero-stat i { color: #60a5fa; font-size: 1rem; }
+
+    /* ===========================================
+       MAIN CONTENT
+    =========================================== */
+    .main-content { padding: 2.5rem 0 5rem; }
+
+    /* ===========================================
+       FORM CARD
+    =========================================== */
+    .form-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+      border-top: 4px solid #3b82f6;
+    }
+
+    .form-card-head {
+      padding: 1.375rem 1.75rem 1.25rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-card-head-icon {
+      width: 34px;
+      height: 34px;
+      background: #eff6ff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3b82f6;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .form-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+
+    .form-card-subtitle {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin: 1px 0 0;
+    }
+
+    .form-card-body { padding: 1.5rem 1.75rem 1.75rem; }
+
+    /* Form sections */
+    .form-section { margin-bottom: 0; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 1rem;
+    }
+
+    .step-dot {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(59,130,246,0.35);
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .form-divider {
+      border: none;
+      border-top: 1px solid #f1f5f9;
+      margin: 1.375rem 0;
+    }
+
+    /* Inputs */
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .form-label i { color: #94a3b8; font-size: 0.875rem; }
+
+    .form-control,
+    .form-select {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.6rem 0.875rem;
+      font-size: 0.875rem;
+      color: #1e293b;
+      background: #fafafa;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: #fff;
+      outline: none;
+    }
+
+    .form-control::placeholder { color: #c1cad6; }
+
+    .form-hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    /* Slider */
+    .slider-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.125rem 0.875rem;
+    }
+
+    .slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+    }
+
+    .slider-caption {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    #loanAmountDisplay {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #3b82f6;
+      letter-spacing: -0.6px;
+      line-height: 1;
+    }
+
+    .form-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, #3b82f6 0%, #3b82f6 50%, #e2e8f0 50%, #e2e8f0 100%);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      border: none;
+    }
+
+    .form-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.18), 0 2px 5px rgba(0,0,0,0.18);
+      transition: box-shadow 0.15s;
+    }
+
+    .form-range::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 7px rgba(59,130,246,0.2), 0 2px 5px rgba(0,0,0,0.18);
+    }
+
+    .form-range::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+    }
+
+    .slider-limits {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .slider-limit {
+      font-size: 0.68rem;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 45%, #2563eb 100%);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.32);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(37,99,235,0.42);
+      background: linear-gradient(135deg, #1e293b 0%, #1d4ed8 100%);
+    }
+
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ===========================================
+       WELCOME PANEL
+    =========================================== */
+    .welcome-panel {
+      background: #fff;
+      border-radius: 16px;
+      border: 2px dashed #cbd5e1;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .welcome-orb {
+      width: 76px;
+      height: 76px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2.1rem;
+      color: #3b82f6;
+    }
+
+    .welcome-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-body {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      max-width: 290px;
+      line-height: 1.6;
+      margin: 0 auto;
+    }
+
+    .welcome-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 290px;
+    }
+
+    .welcome-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #475569;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    .welcome-item i { color: #3b82f6; font-size: 1rem; flex-shrink: 0; }
+
+    /* ===========================================
+       RESULT CARD
+    =========================================== */
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    /* Risk header variants */
+    .result-header {
+      padding: 2rem 1.75rem 1.75rem;
+      text-align: center;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    .result-header.low-risk    { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); }
+    .result-header.medium-risk { background: linear-gradient(135deg, #78350f 0%, #d97706 100%); }
+    .result-header.high-risk   { background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); }
+
+    /* Gauge */
+    .gauge-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+    }
+
+    .gauge-svg { width: 180px; height: 180px; display: block; }
+
+    .gauge-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.15);
+      stroke-width: 11;
+      stroke-linecap: round;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: rgba(255,255,255,0.95);
+      stroke-width: 11;
+      stroke-linecap: round;
+      transition: stroke-dasharray 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .gauge-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #scoreNumber {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -2.5px;
+      line-height: 1;
+    }
+
+    .gauge-sub {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.65);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 3px;
+    }
+
+    /* Risk badge inside header */
+    #riskCategory {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      margin-top: 1rem;
+    }
+
+    #customerName {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.83rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    #scoreInterpretation {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 3px;
+      position: relative;
+    }
+
+    /* Result body */
+    .result-body { padding: 1.5rem 1.75rem; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem;
+    }
+
+    .result-item {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      padding: 0.875rem 1rem;
+    }
+
+    .result-item-lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .result-item-val {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    /* ===========================================
+       ERROR CARD
+    =========================================== */
+    .error-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1.5px solid #fecaca;
+      box-shadow: 0 4px 16px rgba(239,68,68,0.1);
+    }
+
+    .error-head {
+      background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+      padding: 0.9rem 1.375rem;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .error-body {
+      background: #fff;
+      padding: 1.1rem 1.375rem;
+    }
+
+    #errorMessage {
+      color: #dc2626;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* ===========================================
+       HISTORY SECTION
+    =========================================== */
+    .history-section { margin-top: 2.5rem; }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.375rem;
+    }
+
+    .history-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.4px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-title i { color: #3b82f6; }
+
+    #historyCountBadge {
+      background: #eff6ff;
+      color: #3b82f6;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .btn-refresh {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.45rem 0.9rem;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      color: #64748b;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-refresh:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    /* Simulation grid — CSS Grid so it works without Bootstrap CDN */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 600px) {
+      .sim-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 900px) {
+      .sim-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 1200px) {
+      .sim-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* Sim cards */
+    .sim-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: 100%;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .sim-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+    }
+
+    .sim-card.low-risk    { border-top: 3px solid #10b981; }
+    .sim-card.medium-risk { border-top: 3px solid #f59e0b; }
+    .sim-card.high-risk   { border-top: 3px solid #ef4444; }
+
+    /* legacy compat — app.js may add these on the outer wrapper too */
+    .simulation-item { transition: transform 0.2s; }
+    .simulation-item:hover { transform: translateY(-2px); }
+
+    .sim-body { padding: 1rem 1.125rem 0.875rem; }
+
+    .sim-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .sim-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 135px;
+    }
+
+    .sim-date {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .sim-score-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 9px;
+      margin: 0.5rem 0 0.625rem;
+    }
+
+    .sim-score {
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+
+    .sim-score.low-risk    { color: #10b981; }
+    .sim-score.medium-risk { color: #f59e0b; }
+    .sim-score.high-risk   { color: #ef4444; }
+
+    .sim-score-meta {
+      padding-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .sim-score-lbl {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .sim-interp {
+      font-size: 0.64rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #cbd5e1;
+    }
+
+    .sim-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .sim-badge.low-risk    { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .sim-badge.medium-risk { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .sim-badge.high-risk   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+    .sim-footer {
+      border-top: 1px solid #f1f5f9;
+      padding: 0.6rem 1.125rem;
+      display: flex;
+      gap: 1.25rem;
+      background: #fafafa;
+    }
+
+    .sim-detail-lbl {
+      display: block;
+      font-size: 0.66rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .sim-detail-val {
+      font-size: 0.78rem;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    /* Empty / loading states */
+    .state-box {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #94a3b8;
+    }
+
+    .state-box i {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.75rem;
+      color: #cbd5e1;
+    }
+
+    .state-box p {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* ===========================================
+       FOOTER
+    =========================================== */
+    .footer-bar {
+      background: #0f172a;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      padding: 1.5rem 0;
+      font-size: 0.78rem;
+    }
+
+    .footer-bar i { color: #3b82f6; }
+
+    /* ===========================================
+       RESPONSIVE
+    =========================================== */
+    @media (max-width: 991px) {
+      .hero-title { font-size: 2.1rem; }
+    }
+
+    @media (max-width: 767px) {
+      .hero-title { font-size: 1.75rem; }
+      .hero-stats { gap: 6px; }
+      .hero-stat { border-radius: 7px !important; border: 1px solid rgba(255,255,255,0.08) !important; }
+      .result-grid { grid-template-columns: 1fr; }
+      .form-card-body { padding: 1.25rem; }
+      .welcome-panel { min-height: 280px; padding: 2.5rem 1.25rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar-fintech">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a class="brand-wrap" href="#">
+        <div class="brand-icon">
+          <i class="bi bi-graph-up-arrow"></i>
         </div>
-        
-        <!-- Previous Simulations -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-clock-history"></i> Previous Simulations
-                        </h5>
-                        <button class="btn btn-outline-primary btn-sm" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="simulationsList">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-hourglass-split"></i> Loading...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="brand-text">
+          <div class="brand-name">Credit<em>Sim</em></div>
+          <div class="brand-sub">Risk Intelligence Platform</div>
         </div>
+      </a>
+      <div class="nav-pill">
+        <i class="bi bi-shield-check"></i> Demo
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="hero-eyebrow">
+            <i class="bi bi-cpu"></i> AI-Powered Scoring Engine
+          </div>
+          <h1 class="hero-title">
+            Credit Risk<br>
+            <span class="gradient-text">Intelligence</span>
+          </h1>
+          <p class="hero-sub">
+            Simulate credit scores and assess borrower risk in seconds with our advanced multi-factor scoring model.
+          </p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <i class="bi bi-bar-chart-steps"></i>
+              300–850 Score Range
+            </div>
+            <div class="hero-stat">
+              <i class="bi bi-lightning-charge-fill"></i>
+              Instant Results
+            </div>
+            <div class="hero-stat">
+              <i class="bi bi-shield-fill-check"></i>
+              3-Tier Risk Assessment
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="container main-content">
+    <div class="row g-4 align-items-start">
+
+      <!-- ===== FORM COLUMN ===== -->
+      <div class="col-lg-5">
+        <div class="form-card">
+
+          <div class="form-card-head">
+            <div class="form-card-head-icon">
+              <i class="bi bi-person-vcard-fill"></i>
+            </div>
+            <div>
+              <div class="form-card-title">Applicant Profile</div>
+              <div class="form-card-subtitle">Complete all sections to run the simulation</div>
+            </div>
+          </div>
+
+          <div class="form-card-body">
+            <form id="creditForm" novalidate>
+
+              <!-- ── Section 1: Personal Details ── -->
+              <div class="form-section">
+                <div class="section-head">
+                  <div class="step-dot">1</div>
+                  <span class="section-label">Personal Details</span>
+                </div>
+
+                <div class="mb-3">
+                  <label for="name" class="form-label">
+                    <i class="bi bi-person"></i> Full Name
+                  </label>
+                  <input type="text" class="form-control" id="name" name="name"
+                         placeholder="e.g. Jane Smith" required>
+                </div>
+
+                <div class="mb-0">
+                  <label for="age" class="form-label">
+                    <i class="bi bi-calendar3"></i> Age
+                  </label>
+                  <input type="number" class="form-control" id="age" name="age"
+                         min="18" max="120" placeholder="e.g. 35" required>
+                </div>
+              </div>
+
+              <hr class="form-divider">
+
+              <!-- ── Section 2: Financial Details ── -->
+              <div class="form-section">
+                <div class="section-head">
+                  <div class="step-dot">2</div>
+                  <span class="section-label">Financial Details</span>
+                </div>
+
+                <div class="mb-3">
+                  <label for="annualIncome" class="form-label">
+                    <i class="bi bi-currency-dollar"></i> Annual Income
+                  </label>
+                  <input type="number" class="form-control" id="annualIncome"
+                         name="annualIncome" min="0" step="any"
+                         placeholder="e.g. 75000" required>
+                </div>
+
+                <div class="mb-0">
+                  <label for="debtToIncomeRatio" class="form-label">
+                    <i class="bi bi-percent"></i> Debt-to-Income Ratio
+                  </label>
+                  <input type="number" class="form-control" id="debtToIncomeRatio"
+                         name="debtToIncomeRatio" min="0" max="1" step="0.01"
+                         placeholder="e.g. 0.30" required>
+                  <div class="form-hint">Enter as decimal — 0.3&nbsp;=&nbsp;30%</div>
+                </div>
+              </div>
+
+              <hr class="form-divider">
+
+              <!-- ── Section 3: Loan Request ── -->
+              <div class="form-section">
+                <div class="section-head">
+                  <div class="step-dot">3</div>
+                  <span class="section-label">Loan Request</span>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">
+                    <i class="bi bi-bank"></i> Loan Amount
+                  </label>
+                  <div class="slider-box">
+                    <div class="slider-top">
+                      <span class="slider-caption">Requested Amount</span>
+                      <span id="loanAmountDisplay">$15,000</span>
+                    </div>
+                    <input type="range" class="form-range" id="loanAmount"
+                           name="loanAmount" min="5000" max="25000"
+                           step="1000" value="15000" required>
+                    <div class="slider-limits">
+                      <span class="slider-limit">$5,000</span>
+                      <span class="slider-limit">$25,000</span>
+                    </div>
+                    <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
+                  </div>
+                </div>
+
+                <div class="mb-0">
+                  <label for="creditHistory" class="form-label">
+                    <i class="bi bi-clock-history"></i> Credit History
+                  </label>
+                  <select class="form-select" id="creditHistory" name="creditHistory" required>
+                    <option value="">Select credit history...</option>
+                    <option value="good">Good — Positive payment record</option>
+                    <option value="bad">Bad — Negative payment record</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <div class="mt-4">
+                <button type="submit" class="btn-submit">
+                  <i class="bi bi-calculator-fill"></i>
+                  Analyze Credit Risk
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div><!-- /form-card -->
+      </div><!-- /col-lg-5 -->
+
+      <!-- ===== RESULTS COLUMN ===== -->
+      <div class="col-lg-7">
+
+        <!-- Welcome placeholder -->
+        <div id="welcomePanel" class="welcome-panel">
+          <div class="welcome-orb">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <h3 class="welcome-title">Ready to Analyze</h3>
+          <p class="welcome-body">
+            Complete the applicant profile on the left and submit to receive an instant credit score and full risk assessment.
+          </p>
+          <div class="welcome-list">
+            <div class="welcome-item">
+              <i class="bi bi-speedometer2"></i>
+              Real-time credit score calculation
+            </div>
+            <div class="welcome-item">
+              <i class="bi bi-shield-check"></i>
+              3-tier risk classification (Low / Medium / High)
+            </div>
+            <div class="welcome-item">
+              <i class="bi bi-clock-history"></i>
+              Full simulation history tracking
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Card (hidden until score returned) -->
+        <div id="resultCard" class="result-card d-none">
+
+          <div class="result-header" id="resultHeader">
+            <!-- SVG Gauge -->
+            <div class="gauge-wrapper">
+              <svg class="gauge-svg" viewBox="0 0 200 200" aria-hidden="true">
+                <!-- 270° arc track: circumference = 2π × r(70) ≈ 439.82; track = 0.75 × 439.82 ≈ 329.87 -->
+                <circle class="gauge-track"
+                        cx="100" cy="100" r="70"
+                        stroke-dasharray="329.87 439.82"
+                        transform="rotate(135, 100, 100)"/>
+                <!-- Score fill arc -->
+                <circle id="scoreGaugeFill" class="gauge-fill"
+                        cx="100" cy="100" r="70"
+                        stroke-dasharray="0 439.82"
+                        transform="rotate(135, 100, 100)"/>
+              </svg>
+              <div class="gauge-center">
+                <div id="scoreNumber">—</div>
+                <div class="gauge-sub">FICO Score</div>
+              </div>
+            </div>
+
+            <!-- Risk badge -->
+            <div id="riskCategory">
+              <i class="bi bi-circle-fill" style="font-size:0.45rem;"></i>
+              Risk Level
+            </div>
+
+            <!-- Customer name & interpretation -->
+            <div id="customerName"></div>
+            <div id="scoreInterpretation"></div>
+          </div><!-- /result-header -->
+
+          <div class="result-body">
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="result-item-lbl">
+                  <i class="bi bi-bank"></i> Loan Amount
+                </div>
+                <div class="result-item-val" id="resultLoanAmount">—</div>
+              </div>
+              <div class="result-item">
+                <div class="result-item-lbl">
+                  <i class="bi bi-currency-dollar"></i> Annual Income
+                </div>
+                <div class="result-item-val" id="resultIncome">—</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /resultCard -->
+
+        <!-- Error Card -->
+        <div id="errorCard" class="d-none">
+          <div class="error-wrap">
+            <div class="error-head">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              Calculation Error
+            </div>
+            <div class="error-body">
+              <div id="errorMessage"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /col-lg-7 -->
+    </div><!-- /row -->
+
+    <!-- ===== HISTORY SECTION ===== -->
+    <div class="history-section">
+      <div class="history-head">
+        <div class="history-title-wrap">
+          <h3 class="history-title">
+            <i class="bi bi-clock-history"></i>
+            Recent Simulations
+          </h3>
+          <span id="historyCountBadge">0</span>
+        </div>
+        <button class="btn-refresh" id="refreshBtn">
+          <i class="bi bi-arrow-clockwise"></i>
+          Refresh
+        </button>
+      </div>
+
+      <div id="simulationsList">
+        <div class="state-box">
+          <i class="bi bi-hourglass-split"></i>
+          <p>Loading simulations…</p>
+        </div>
+      </div>
     </div>
 
-    <footer class="bg-dark text-light text-center py-3 mt-5">
-        <div class="container">
-            <small>
-                <i class="bi bi-info-circle"></i> 
-                This is a demonstration application. Do not use for actual credit decisions.
-            </small>
-        </div>
-    </footer>
+  </div><!-- /container -->
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer-bar">
+    <div class="container">
+      <i class="bi bi-info-circle"></i>
+      This is a demonstration application. Do not use for actual credit decisions.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
