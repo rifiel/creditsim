@@ -90,15 +90,28 @@ describe('API Endpoints', () => {
   });
 
   describe('GET /api/simulations', () => {
-    test('should return list of simulations', async () => {
+    test('should return paginated simulations with metadata', async () => {
       const response = await request(app)
         .get('/api/simulations')
         .expect(200);
 
-      expect(response.body).toHaveProperty('count');
+      expect(response.body).toHaveProperty('page');
+      expect(response.body).toHaveProperty('limit');
+      expect(response.body).toHaveProperty('totalCount');
+      expect(response.body).toHaveProperty('totalPages');
       expect(response.body).toHaveProperty('simulations');
       expect(Array.isArray(response.body.simulations)).toBe(true);
-      expect(typeof response.body.count).toBe('number');
+      expect(typeof response.body.totalCount).toBe('number');
+      expect(response.body.page).toBe(1);
+      expect(response.body.limit).toBe(6);
+    });
+
+    test('should return at most 6 simulations per page by default', async () => {
+      const response = await request(app)
+        .get('/api/simulations')
+        .expect(200);
+
+      expect(response.body.simulations.length).toBeLessThanOrEqual(6);
     });
 
     test('should return simulations in correct format', async () => {
@@ -127,6 +140,51 @@ describe('API Endpoints', () => {
         expect(simulation).toHaveProperty('loanAmount');
         expect(simulation).toHaveProperty('createdAt');
       }
+    });
+
+    test('should return page 2 with different simulations than page 1', async () => {
+      const page1 = await request(app).get('/api/simulations?page=1&limit=6').expect(200);
+      const page2 = await request(app).get('/api/simulations?page=2&limit=6').expect(200);
+
+      if (page1.body.simulations.length > 0 && page2.body.simulations.length > 0) {
+        const ids1 = page1.body.simulations.map(s => s.id);
+        const ids2 = page2.body.simulations.map(s => s.id);
+        const overlap = ids1.filter(id => ids2.includes(id));
+        expect(overlap.length).toBe(0);
+      }
+    });
+
+    test('should return empty simulations array for out-of-range page', async () => {
+      const response = await request(app)
+        .get('/api/simulations?page=9999')
+        .expect(200);
+
+      expect(response.body.simulations).toEqual([]);
+      expect(response.body.page).toBe(9999);
+    });
+
+    test('should return 400 for page=0', async () => {
+      const response = await request(app)
+        .get('/api/simulations?page=0')
+        .expect(400);
+
+      expect(response.body.error).toBe('Validation failed');
+    });
+
+    test('should return 400 for non-integer page', async () => {
+      const response = await request(app)
+        .get('/api/simulations?page=abc')
+        .expect(400);
+
+      expect(response.body.error).toBe('Validation failed');
+    });
+
+    test('should return 400 for non-integer limit', async () => {
+      const response = await request(app)
+        .get('/api/simulations?limit=abc')
+        .expect(400);
+
+      expect(response.body.error).toBe('Validation failed');
     });
   });
 

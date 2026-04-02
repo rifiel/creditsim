@@ -116,6 +116,36 @@ class Database {
     });
   }
 
+  async getTotalCustomersCount() {
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT COUNT(*) AS total FROM customers', [], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row.total);
+        }
+      });
+    });
+  }
+
+  async getPaginatedCustomers(offset, limit) {
+    return new Promise((resolve, reject) => {
+      const selectSQL = `
+        SELECT id, name, score, riskCategory, loanAmount, createdAt
+        FROM customers
+        ORDER BY createdAt DESC
+        LIMIT ? OFFSET ?
+      `;
+      this.db.all(selectSQL, [limit, offset], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   async close() {
     return new Promise((resolve, reject) => {
       if (this.db) {

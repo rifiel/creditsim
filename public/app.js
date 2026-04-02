@@ -1,5 +1,7 @@
 // Credit Risk Simulator Frontend JavaScript
 
+const PAGE_SIZE = 6;
+
 class CreditSimulator {
     constructor() {
         this.form = document.getElementById('creditForm');
@@ -7,16 +9,25 @@ class CreditSimulator {
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
+        this.paginationContainer = document.getElementById('paginationContainer');
+        this.currentPage = 1;
+        this.totalPages = 1;
         
         this.init();
     }
     
     init() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
-        this.refreshBtn.addEventListener('click', this.loadSimulations.bind(this));
+        this.refreshBtn.addEventListener('click', () => this.loadSimulations(this.currentPage));
+
+        window.addEventListener('popstate', (e) => {
+            const page = e.state?.page ?? 1;
+            this.loadSimulations(page, false);
+        });
         
-        // Load previous simulations on page load
-        this.loadSimulations();
+        // Load page from URL on initial load
+        const initialPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+        this.loadSimulations(initialPage, false);
         
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
@@ -45,7 +56,7 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            this.loadSimulations(1); // After submit, go back to page 1
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -99,16 +110,25 @@ class CreditSimulator {
         return result;
     }
     
-    async loadSimulations() {
+    async loadSimulations(page = 1, pushState = true) {
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${page}&limit=${PAGE_SIZE}`);
             const data = await response.json();
             
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to load simulations');
             }
+
+            this.currentPage = data.page;
+            this.totalPages = data.totalPages;
+
+            if (pushState) {
+                const url = page === 1 ? '/' : `/?page=${page}`;
+                history.pushState({ page }, '', url);
+            }
             
             this.renderSimulations(data.simulations);
+            this.renderPagination();
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
@@ -116,6 +136,7 @@ class CreditSimulator {
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
+            this.paginationContainer.innerHTML = '';
         }
     }
     
@@ -169,6 +190,87 @@ class CreditSimulator {
                 ${simulationsHtml}
             </div>
         `;
+    }
+
+    renderPagination() {
+        if (this.totalPages <= 1) {
+            this.paginationContainer.innerHTML = '';
+            return;
+        }
+
+        const maxVisible = 5;
+        const half = Math.floor(maxVisible / 2);
+        let start = Math.max(1, this.currentPage - half);
+        let end = Math.min(this.totalPages, start + maxVisible - 1);
+        if (end - start < maxVisible - 1) {
+            start = Math.max(1, end - maxVisible + 1);
+        }
+
+        const items = [];
+
+        // Prev
+        items.push(`
+            <li class="page-item${this.currentPage === 1 ? ' disabled' : ''}">
+                <a class="page-link" href="#" aria-label="Previous"
+                   ${this.currentPage > 1 ? `data-page="${this.currentPage - 1}"` : 'tabindex="-1" aria-disabled="true"'}>
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `);
+
+        // Leading ellipsis
+        if (start > 1) {
+            items.push(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+            if (start > 2) {
+                items.push(`<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`);
+            }
+        }
+
+        // Page numbers
+        for (let i = start; i <= end; i++) {
+            items.push(`
+                <li class="page-item${i === this.currentPage ? ' active' : ''}" ${i === this.currentPage ? 'aria-current="page"' : ''}>
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+
+        // Trailing ellipsis
+        if (end < this.totalPages) {
+            if (end < this.totalPages - 1) {
+                items.push(`<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`);
+            }
+            items.push(`<li class="page-item"><a class="page-link" href="#" data-page="${this.totalPages}">${this.totalPages}</a></li>`);
+        }
+
+        // Next
+        items.push(`
+            <li class="page-item${this.currentPage === this.totalPages ? ' disabled' : ''}">
+                <a class="page-link" href="#" aria-label="Next"
+                   ${this.currentPage < this.totalPages ? `data-page="${this.currentPage + 1}"` : 'tabindex="-1" aria-disabled="true"'}>
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `);
+
+        this.paginationContainer.innerHTML = `
+            <ul class="pagination justify-content-center mb-0">
+                ${items.join('')}
+            </ul>
+        `;
+
+        this.paginationContainer.querySelectorAll('a.page-link[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = parseInt(link.dataset.page);
+                this.goToPage(page);
+            });
+        });
+    }
+
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.loadSimulations(page);
     }
     
     showResult(result) {
