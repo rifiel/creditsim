@@ -241,4 +241,49 @@ describe('API Endpoints', () => {
       expect(response.body.error).toBe('Endpoint not found');
     });
   });
+
+  describe('Route error handling (500 responses)', () => {
+    const validCustomerData = {
+      name: 'Error Test',
+      age: 35,
+      annualIncome: 60000,
+      debtToIncomeRatio: 0.3,
+      loanAmount: 25000,
+      creditHistory: 'good'
+    };
+
+    test('POST /api/simulate should return 500 when database insert fails', async () => {
+      jest.spyOn(database, 'insertCustomer').mockRejectedValueOnce(new Error('DB insert error'));
+
+      const response = await request(app)
+        .post('/api/simulate')
+        .send(validCustomerData)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to calculate credit score');
+    });
+
+    test('GET /api/simulations should return 500 when database fetch fails', async () => {
+      jest.spyOn(database, 'getAllCustomers').mockRejectedValueOnce(new Error('DB fetch error'));
+
+      const response = await request(app)
+        .get('/api/simulations')
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to fetch simulations');
+    });
+
+    test('GET /api/simulation/:id should return 500 when database fetch fails', async () => {
+      jest.spyOn(database, 'getCustomerById').mockRejectedValueOnce(new Error('DB fetch error'));
+
+      const response = await request(app)
+        .get('/api/simulation/1')
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to fetch simulation');
+    });
+  });
 });

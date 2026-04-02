@@ -112,6 +112,26 @@ describe('Credit Scoring Service', () => {
       // Base (600) + income bonus (80) + low loan-to-income bonus (30) = 710
       expect(result.riskCategory).toBe('Medium risk');
     });
+
+    test('should apply very high income bonus for income > 200000', () => {
+      const veryHighIncomeCustomer = { ...baseCustomer, annualIncome: 250000 };
+      const result = calculateCreditScore(veryHighIncomeCustomer);
+
+      // Base (600) + very high income bonus (120) + loan-to-income < 0.25 bonus (15)
+      // loanToIncomeRatio = 25000/250000 = 0.1 which equals 0.1 (not < 0.1) but IS < 0.25
+      expect(result.score).toBe(735);
+      expect(result.riskCategory).toBe('Medium risk');
+    });
+
+    test('should apply low loan-to-income bonus for ratio between 0.1 and 0.25', () => {
+      // loanAmount / annualIncome = 12000 / 60000 = 0.2 (between 0.1 and 0.25)
+      const lowLoanCustomer = { ...baseCustomer, loanAmount: 12000 };
+      const result = calculateCreditScore(lowLoanCustomer);
+
+      // Base (600) + income bonus (40) + low loan-to-income bonus (15) = 655
+      expect(result.score).toBe(655);
+      expect(result.riskCategory).toBe('Medium risk');
+    });
   });
 
   describe('determineRiskCategory', () => {
