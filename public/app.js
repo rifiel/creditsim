@@ -3,6 +3,7 @@
 class CreditSimulator {
     constructor() {
         this.form = document.getElementById('creditForm');
+        this.resultPlaceholder = document.getElementById('resultPlaceholder');
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
@@ -122,81 +123,75 @@ class CreditSimulator {
     renderSimulations(simulations) {
         if (simulations.length === 0) {
             this.simulationsList.innerHTML = `
-                <div class="text-center text-muted">
-                    <i class="bi bi-inbox"></i><br>
-                    No simulations yet. Submit your first calculation above!
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No simulations yet. Submit your first calculation above.</p>
                 </div>
             `;
             return;
         }
         
-        const simulationsHtml = simulations.map(sim => {
+        const rows = simulations.map(sim => {
             const riskClass = this.getRiskClass(sim.riskCategory);
-            const riskBadgeClass = this.getRiskBadgeClass(sim.riskCategory);
-            
             return `
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card simulation-item h-100 ${riskClass}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">${this.escapeHtml(sim.name)}</h6>
-                                <span class="badge ${riskBadgeClass}">${sim.riskCategory}</span>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="h4 mb-0">${sim.score}</div>
-                                    <small class="text-muted">Credit Score</small>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <div class="fw-bold">$${sim.loanAmount.toLocaleString()}</div>
-                                    <small class="text-muted">Loan Amount</small>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> 
-                                    ${this.formatDate(sim.createdAt)}
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <tr>
+                    <td class="fw-medium">${this.escapeHtml(sim.name)}</td>
+                    <td><span class="sim-score ${riskClass}">${sim.score}</span></td>
+                    <td><span class="risk-pill ${riskClass}">${sim.riskCategory}</span></td>
+                    <td>$${sim.loanAmount.toLocaleString()}</td>
+                    <td class="text-muted">${this.formatDate(sim.createdAt)}</td>
+                </tr>
             `;
         }).join('');
         
         this.simulationsList.innerHTML = `
-            <div class="row">
-                ${simulationsHtml}
+            <div class="table-responsive">
+                <table class="sim-table table table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Score</th>
+                            <th>Risk</th>
+                            <th>Loan Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
             </div>
         `;
     }
     
     showResult(result) {
         const { score, riskCategory, customer } = result;
+        const riskClass = this.getRiskClass(riskCategory);
         
-        // Update result card
+        // Update score ring
+        const scoreRing = document.getElementById('scoreRing');
+        scoreRing.className = `score-ring ${riskClass}`;
         document.getElementById('scoreNumber').textContent = score;
+
+        // Update risk badge
+        const riskBadge = document.getElementById('riskCategory');
+        riskBadge.textContent = riskCategory;
+        riskBadge.className = `risk-badge ${riskClass}`;
+
         document.getElementById('customerName').textContent = `for ${customer.name}`;
         document.getElementById('resultLoanAmount').textContent = `$${customer.loanAmount.toLocaleString()}`;
         document.getElementById('resultIncome').textContent = `$${customer.annualIncome.toLocaleString()}`;
         
-        // Update risk category badge
-        const riskBadge = document.getElementById('riskCategory');
-        riskBadge.textContent = riskCategory;
-        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskCategory)}`;
-        
-        // Update card styling
-        this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
-        
+        this.resultPlaceholder.classList.add('d-none');
         this.resultCard.classList.remove('d-none');
     }
     
     showError(message) {
         document.getElementById('errorMessage').textContent = message;
+        this.resultPlaceholder.classList.add('d-none');
         this.errorCard.classList.remove('d-none');
     }
     
     hideCards() {
+        this.resultPlaceholder.classList.remove('d-none');
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
     }
@@ -219,15 +214,6 @@ class CreditSimulator {
             case 'Medium risk': return 'medium-risk';
             case 'High risk': return 'high-risk';
             default: return '';
-        }
-    }
-    
-    getRiskBadgeClass(riskCategory) {
-        switch (riskCategory) {
-            case 'Low risk': return 'bg-success';
-            case 'Medium risk': return 'bg-warning text-dark';
-            case 'High risk': return 'bg-danger';
-            default: return 'bg-secondary';
         }
     }
     
