@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const { database } = require('../database/database');
 const { calculateCreditScore, getScoringCriteria } = require('../services/creditScoring');
 
@@ -37,6 +37,17 @@ const validateIdParam = [
   param('id')
     .isInt({ min: 1 })
     .withMessage('ID must be a positive integer')
+];
+
+const validatePaginationParams = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('limit must be an integer between 1 and 100')
 ];
 
 // Middleware to handle validation errors
@@ -99,22 +110,27 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
 
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get paginated simulations history
  */
-router.get('/simulations', async (req, res) => {
+router.get('/simulations', validatePaginationParams, handleValidationErrors, async (req, res) => {
   try {
-    const simulations = await database.getAllCustomers();
-    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const offset = (page - 1) * limit;
+
+    const [totalCount, simulations] = await Promise.all([
+      database.getTotalCustomersCount(),
+      database.getPaginatedCustomers(offset, limit)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
     res.json({
-      count: simulations.length,
-      simulations: simulations.map(sim => ({
-        id: sim.id,
-        name: sim.name,
-        score: sim.score,
-        riskCategory: sim.riskCategory,
-        loanAmount: sim.loanAmount,
-        createdAt: sim.createdAt
-      }))
+      page,
+      limit,
+      totalCount,
+      totalPages,
+      simulations
     });
     
   } catch (error) {
