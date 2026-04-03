@@ -7,201 +7,480 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .score-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        :root {
+            --navy:       #1e3a5f;
+            --navy-dark:  #162d4a;
+            --accent:     #2563eb;
+            --bg:         #f1f5f9;
+            --surface:    #ffffff;
+            --border:     #e2e8f0;
+            --text:       #1e293b;
+            --muted:      #64748b;
+            --low:        #16a34a;
+            --low-bg:     #dcfce7;
+            --med:        #d97706;
+            --med-bg:     #fef3c7;
+            --high:       #dc2626;
+            --high-bg:    #fee2e2;
         }
-        .low-risk { border-left: 5px solid #28a745; }
-        .medium-risk { border-left: 5px solid #ffc107; }
-        .high-risk { border-left: 5px solid #dc3545; }
-        .score-number {
-            font-size: 3rem;
-            font-weight: bold;
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-size: 0.9rem;
         }
-        .simulation-item {
-            transition: transform 0.2s;
+
+        /* ── Top navigation ── */
+        .top-bar {
+            background-color: var(--navy);
+            border-bottom: 3px solid var(--accent);
+            padding: 0.7rem 0;
         }
-        .simulation-item:hover {
-            transform: translateY(-2px);
+        .top-bar .brand-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            color: #fff;
         }
-        
-        /* Enhanced range slider styling */
-        .form-range {
-            height: 6px;
+        .top-bar .brand-sub {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .top-bar .demo-badge {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.65);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.18);
+            white-space: nowrap;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            padding: 1.5rem 0 1rem;
+        }
+        .page-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.15rem;
+        }
+        .page-header p {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        /* ── Panel (card replacement) ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .panel-header {
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .panel-title .bi {
+            color: var(--accent);
+        }
+        .panel-body {
+            padding: 1.25rem;
+        }
+
+        /* ── Form sections ── */
+        .form-section-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+        .form-control, .form-select {
+            font-size: 0.875rem;
+            border-color: var(--border);
+            border-radius: 4px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .form-text {
+            font-size: 0.73rem;
+            color: var(--muted);
+        }
+
+        /* ── CTA button ── */
+        .btn-cta {
+            background-color: var(--navy);
+            border-color: var(--navy);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            letter-spacing: 0.02em;
+        }
+        .btn-cta:hover, .btn-cta:focus {
+            background-color: var(--navy-dark);
+            border-color: var(--navy-dark);
+            color: #fff;
+        }
+        .btn-cta:disabled {
+            background-color: var(--navy);
+            opacity: 0.65;
+        }
+
+        /* ── Loan slider ── */
+        .loan-display {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .loan-range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
         }
         .form-range::-webkit-slider-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background: var(--accent);
         }
         .form-range::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
+            background: var(--accent);
             border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .form-range:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+
+        /* ── Score result ── */
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+        .score-meta {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+        .score-bar-wrap {
+            background: var(--border);
+            border-radius: 3px;
+            height: 5px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .score-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .score-bar-low    { background: var(--low); }
+        .score-bar-medium { background: var(--med); }
+        .score-bar-high   { background: var(--high); }
+
+        .risk-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.28rem 0.65rem;
+            border-radius: 3px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .risk-low    { background: var(--low-bg);  color: var(--low); }
+        .risk-medium { background: var(--med-bg);  color: var(--med); }
+        .risk-high   { background: var(--high-bg); color: var(--high); }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--muted); }
+        .detail-value { font-weight: 600; }
+
+        /* Result panel left-border accent */
+        .result-low    { border-left: 4px solid var(--low); }
+        .result-medium { border-left: 4px solid var(--med); }
+        .result-high   { border-left: 4px solid var(--high); }
+
+        /* ── Simulations table ── */
+        .sim-table {
+            font-size: 0.82rem;
+            margin: 0;
+        }
+        .sim-table thead th {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            font-weight: 700;
+            border-bottom: 2px solid var(--border);
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            white-space: nowrap;
+        }
+        .sim-table tbody td {
+            padding: 0.6rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border);
+        }
+        .sim-table tbody tr:last-child td { border-bottom: none; }
+        .sim-table tbody tr:hover td     { background: #f8fafc; }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .risk-badge-low     { background: var(--low-bg);  color: var(--low); }
+        .risk-badge-medium  { background: var(--med-bg);  color: var(--med); }
+        .risk-badge-high    { background: var(--high-bg); color: var(--high); }
+        .risk-badge-default { background: #f1f5f9;        color: var(--muted); }
+
+        .score-pill { font-weight: 700; }
+
+        /* ── Empty / loading states ── */
+        .state-empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        /* ── Footer ── */
+        .enterprise-footer {
+            background: var(--navy);
+            color: rgba(255,255,255,0.45);
+            font-size: 0.73rem;
+            padding: 0.75rem 0;
+            margin-top: 3rem;
+        }
+
+        /* ── Error panel accent ── */
+        .error-panel {
+            border-left: 4px solid var(--high);
         }
     </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-calculator"></i> Credit Risk Simulator
-            </a>
-            <span class="navbar-text">
-                Demo Application - Not for Production Use
-            </span>
+<body>
+
+    <!-- Top navigation -->
+    <nav class="top-bar">
+        <div class="container-xl">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="brand-name">
+                        <i class="bi bi-shield-check me-2"></i>CreditSim
+                    </div>
+                    <div class="brand-sub">Credit Risk Assessment Platform</div>
+                </div>
+                <span class="demo-badge">
+                    <i class="bi bi-info-circle me-1"></i>Demo Environment
+                </span>
+            </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Input Form -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-person-plus"></i> Customer Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="creditForm">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="age" class="form-label">Age</label>
-                                        <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="annualIncome" class="form-label">Annual Income ($)</label>
-                                        <input type="number" class="form-control" id="annualIncome" name="annualIncome" min="0" step="any" required>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="debtToIncomeRatio" class="form-label">Debt-to-Income Ratio</label>
-                                        <input type="number" class="form-control" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="1" step="0.01" required>
-                                        <div class="form-text">Enter as decimal (e.g., 0.3 for 30%)</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="loanAmount" class="form-label">Loan Amount</label>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="text-muted">$5,000</span>
-                                            <span id="loanAmountDisplay" class="fw-bold text-primary">$15,000</span>
-                                            <span class="text-muted">$25,000</span>
-                                        </div>
-                                        <input type="range" class="form-range" id="loanAmount" name="loanAmount" 
-                                               min="5000" max="25000" step="1000" value="15000" required>
-                                        <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="creditHistory" class="form-label">Credit History</label>
-                                <select class="form-select" id="creditHistory" name="creditHistory" required>
-                                    <option value="">Select...</option>
-                                    <option value="good">Good</option>
-                                    <option value="bad">Bad</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-calculator"></i> Calculate Credit Score
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results -->
-            <div class="col-lg-6">
-                <div id="resultCard" class="card score-card d-none">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up"></i> Credit Score Result
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div id="scoreNumber" class="score-number"></div>
-                        <div id="riskCategory" class="badge fs-6 mb-3"></div>
-                        <div id="customerName" class="text-muted"></div>
-                        <hr>
-                        <div class="row text-start">
-                            <div class="col-6">
-                                <small class="text-muted">Loan Amount:</small><br>
-                                <span id="resultLoanAmount"></span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Annual Income:</small><br>
-                                <span id="resultIncome"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="errorCard" class="card border-danger d-none">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Error
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="errorMessage"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Previous Simulations -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-clock-history"></i> Previous Simulations
-                        </h5>
-                        <button class="btn btn-outline-primary btn-sm" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="simulationsList">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-hourglass-split"></i> Loading...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Main content -->
+    <main>
+        <div class="container-xl">
 
-    <footer class="bg-dark text-light text-center py-3 mt-5">
-        <div class="container">
-            <small>
-                <i class="bi bi-info-circle"></i> 
-                This is a demonstration application. Do not use for actual credit decisions.
-            </small>
+            <!-- Page header -->
+            <div class="page-header">
+                <h1>Credit Risk Assessment</h1>
+                <p>Enter customer information to generate a simulated credit risk score.</p>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- ── Left column: input form ── -->
+                <div class="col-lg-5">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <i class="bi bi-person-lines-fill"></i>New Simulation
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="creditForm" novalidate>
+
+                                <!-- Section: Customer identity -->
+                                <p class="form-section-label">Customer Identity</p>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                           placeholder="e.g. Jane Smith" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="age" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="age" name="age"
+                                           min="18" max="120" placeholder="18 – 120" required>
+                                </div>
+
+                                <!-- Section: Financial profile -->
+                                <p class="form-section-label">Financial Profile</p>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <label for="annualIncome" class="form-label">Annual Income ($)</label>
+                                        <input type="number" class="form-control" id="annualIncome"
+                                               name="annualIncome" min="0" step="any"
+                                               placeholder="e.g. 75000" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="debtToIncomeRatio" class="form-label">Debt / Income</label>
+                                        <input type="number" class="form-control" id="debtToIncomeRatio"
+                                               name="debtToIncomeRatio" min="0" max="1" step="0.01"
+                                               placeholder="0.00 – 1.00" required>
+                                        <div class="form-text">Decimal (e.g. 0.30 = 30%)</div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Loan details -->
+                                <p class="form-section-label">Loan Details</p>
+                                <div class="mb-3">
+                                    <label for="creditHistory" class="form-label">Credit History</label>
+                                    <select class="form-select" id="creditHistory" name="creditHistory" required>
+                                        <option value="">Select status…</option>
+                                        <option value="good">Good</option>
+                                        <option value="bad">Bad</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="loanAmount" class="form-label">
+                                        Loan Amount —
+                                        <span id="loanAmountDisplay" class="loan-display">$15,000</span>
+                                    </label>
+                                    <input type="range" class="form-range" id="loanAmount" name="loanAmount"
+                                           min="5000" max="25000" step="1000" value="15000" required>
+                                    <div class="loan-range-labels">
+                                        <span>$5,000</span><span>$25,000</span>
+                                    </div>
+                                    <input type="hidden" id="loanAmountValue" name="loanAmountValue" value="15000">
+                                </div>
+
+                                <!-- CTA -->
+                                <button type="submit" class="btn btn-cta w-100" id="submitBtn">
+                                    <i class="bi bi-calculator me-1"></i>Run Credit Assessment
+                                </button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Right column: result + history ── -->
+                <div class="col-lg-7">
+
+                    <!-- Result panel (hidden until first submission) -->
+                    <div id="resultCard" class="panel mb-4" style="display:none;">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <i class="bi bi-graph-up"></i>Assessment Result
+                            </h2>
+                            <span id="riskCategory" class="risk-indicator"></span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-auto text-center" style="min-width:130px;">
+                                    <div class="score-value" id="scoreNumber"></div>
+                                    <div class="score-meta">Credit Score</div>
+                                    <div class="score-bar-wrap">
+                                        <div class="score-bar" id="scoreBar"></div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div id="customerName" class="fw-semibold mb-3"
+                                         style="font-size:0.95rem;"></div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Loan Amount</span>
+                                        <span class="detail-value" id="resultLoanAmount"></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Annual Income</span>
+                                        <span class="detail-value" id="resultIncome"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error panel (hidden until error) -->
+                    <div id="errorCard" class="panel error-panel mb-4" style="display:none;">
+                        <div class="panel-header">
+                            <h2 class="panel-title" style="color: var(--high);">
+                                <i class="bi bi-exclamation-triangle"></i>Assessment Error
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <p id="errorMessage" class="mb-0" style="color: var(--high);"></p>
+                        </div>
+                    </div>
+
+                    <!-- Simulation history panel -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <i class="bi bi-clock-history"></i>Simulation History
+                            </h2>
+                            <button class="btn btn-sm btn-outline-secondary" id="refreshBtn"
+                                    style="font-size:0.75rem;">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                        </div>
+                        <div id="simulationsList">
+                            <div class="state-empty">
+                                <i class="bi bi-hourglass-split d-block mb-2"
+                                   style="font-size:1.5rem;"></i>
+                                Loading…
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="enterprise-footer">
+        <div class="container-xl text-center">
+            <i class="bi bi-info-circle me-1"></i>
+            Demonstration application — not for use in actual credit decisions.
         </div>
     </footer>
 
