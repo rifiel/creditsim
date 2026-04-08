@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const { database } = require('../database/database');
 const { calculateCreditScore, getScoringCriteria } = require('../services/creditScoring');
 
@@ -97,34 +97,53 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
   }
 });
 
+const PAGE_SIZE = 6;
+
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get paginated previous simulations
  */
-router.get('/simulations', async (req, res) => {
-  try {
-    const simulations = await database.getAllCustomers();
-    
-    res.json({
-      count: simulations.length,
-      simulations: simulations.map(sim => ({
-        id: sim.id,
-        name: sim.name,
-        score: sim.score,
-        riskCategory: sim.riskCategory,
-        loanAmount: sim.loanAmount,
-        createdAt: sim.createdAt
-      }))
-    });
-    
-  } catch (error) {
-    console.error('Error in /simulations:', error);
-    res.status(500).json({
-      error: 'Failed to fetch simulations',
-      message: error.message
-    });
+router.get(
+  '/simulations',
+  [
+    query('page')
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage('Page must be a positive integer')
+      .toInt()
+  ],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const total = await database.countCustomers();
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const requestedPage = req.query.page || 1;
+      const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+
+      const simulations = await database.getCustomersPaginated(currentPage, PAGE_SIZE);
+
+      res.json({
+        data: simulations.map(sim => ({
+          id: sim.id,
+          name: sim.name,
+          score: sim.score,
+          riskCategory: sim.riskCategory,
+          loanAmount: sim.loanAmount,
+          createdAt: sim.createdAt
+        })),
+        currentPage,
+        totalPages
+      });
+
+    } catch (error) {
+      console.error('Error in /simulations:', error);
+      res.status(500).json({
+        error: 'Failed to fetch simulations',
+        message: error.message
+      });
+    }
   }
-});
+);
 
 /**
  * GET /api/simulation/:id

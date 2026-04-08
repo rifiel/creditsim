@@ -13,10 +13,13 @@ class CreditSimulator {
     
     init() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
-        this.refreshBtn.addEventListener('click', this.loadSimulations.bind(this));
+        this.refreshBtn.addEventListener('click', () => this.loadSimulations());
         
-        // Load previous simulations on page load
-        this.loadSimulations();
+        // Restore page from URL on browser back/forward
+        window.addEventListener('popstate', () => this.loadSimulations(null, { pushState: false }));
+        
+        // Load previous simulations on page load (replace state so initial load sets ?page=1)
+        this.loadSimulations(null, { replaceState: true });
         
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
@@ -45,7 +48,7 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            this.loadSimulations(1, { pushState: true }); // Go to page 1 so new entry is visible
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -99,16 +102,31 @@ class CreditSimulator {
         return result;
     }
     
-    async loadSimulations() {
+    async loadSimulations(page = null, { pushState = false, replaceState = false } = {}) {
+        // Resolve page: explicit argument > URL query string > 1
+        if (page === null) {
+            const params = new URLSearchParams(window.location.search);
+            page = parseInt(params.get('page')) || 1;
+        }
+
+        // Sync URL
+        const newUrl = `${window.location.pathname}?page=${page}`;
+        if (pushState) {
+            history.pushState({ page }, '', newUrl);
+        } else if (replaceState) {
+            history.replaceState({ page }, '', newUrl);
+        }
+
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${page}`);
             const data = await response.json();
             
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to load simulations');
             }
             
-            this.renderSimulations(data.simulations);
+            this.renderSimulations(data.data);
+            this.renderPagination(data.currentPage, data.totalPages);
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
@@ -116,7 +134,78 @@ class CreditSimulator {
                     Failed to load previous simulations: ${error.message}
                 </div>
             `;
+            document.getElementById('simulationsPagination').innerHTML = '';
         }
+    }
+
+    renderPagination(currentPage, totalPages) {
+        const nav = document.getElementById('simulationsPagination');
+
+        if (totalPages <= 1) {
+            nav.innerHTML = '';
+            return;
+        }
+
+        const pageNumbers = this.buildPageNumbers(currentPage, totalPages);
+
+        const items = pageNumbers.map(p => {
+            if (p === '...') {
+                return `<li class="page-item disabled" aria-hidden="true">
+                    <span class="page-link">&hellip;</span>
+                </li>`;
+            }
+            const isActive = p === currentPage;
+            return `<li class="page-item${isActive ? ' active' : ''}" ${isActive ? 'aria-current="page"' : ''}>
+                <button class="page-link" data-page="${p}">${p}</button>
+            </li>`;
+        }).join('');
+
+        nav.innerHTML = `
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item${currentPage === 1 ? ' disabled' : ''}">
+                    <button class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </button>
+                </li>
+                ${items}
+                <li class="page-item${currentPage === totalPages ? ' disabled' : ''}">
+                    <button class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </button>
+                </li>
+            </ul>
+        `;
+
+        nav.querySelectorAll('button[data-page]').forEach(btn => {
+            const targetPage = parseInt(btn.dataset.page);
+            if (targetPage >= 1 && targetPage <= totalPages) {
+                btn.addEventListener('click', () => this.loadSimulations(targetPage, { pushState: true }));
+            }
+        });
+    }
+
+    buildPageNumbers(currentPage, totalPages) {
+        if (totalPages <= 7) {
+            return Array.from({ length: totalPages }, (_, i) => i + 1);
+        }
+        // Ellipsis trimming for larger page counts
+        const pages = [];
+        if (currentPage <= 4) {
+            for (let i = 1; i <= 5; i++) pages.push(i);
+            pages.push('...');
+            pages.push(totalPages);
+        } else if (currentPage >= totalPages - 3) {
+            pages.push(1);
+            pages.push('...');
+            for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            pages.push('...');
+            for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+            pages.push('...');
+            pages.push(totalPages);
+        }
+        return pages;
     }
     
     renderSimulations(simulations) {
