@@ -6,18 +6,31 @@ class CreditSimulator {
         this.resultCard = document.getElementById('resultCard');
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
+        this.paginationControls = document.getElementById('paginationControls');
         this.refreshBtn = document.getElementById('refreshBtn');
-        
+        this.currentPage = 1;
+
         this.init();
     }
-    
+
     init() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
-        this.refreshBtn.addEventListener('click', this.loadSimulations.bind(this));
-        
+        this.refreshBtn.addEventListener('click', () => this.loadSimulations(1));
+
+        // Read initial page from URL
+        const params = new URLSearchParams(window.location.search);
+        this.currentPage = parseInt(params.get('page')) || 1;
+
         // Load previous simulations on page load
-        this.loadSimulations();
-        
+        this.loadSimulations(this.currentPage, false);
+
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', (e) => {
+            const page = (e.state && e.state.page) || 1;
+            this.currentPage = page;
+            this.loadSimulations(page, false);
+        });
+
         // Add slider handler only (removed income formatting)
         this.setupLoanSlider();
     }
@@ -45,7 +58,7 @@ class CreditSimulator {
             const formData = this.getFormData();
             const response = await this.submitSimulation(formData);
             this.showResult(response);
-            this.loadSimulations(); // Refresh the list
+            this.loadSimulations(1); // Refresh the list from page 1
         } catch (error) {
             this.showError(error.message);
         } finally {
@@ -99,24 +112,95 @@ class CreditSimulator {
         return result;
     }
     
-    async loadSimulations() {
+    async loadSimulations(page = 1, pushToHistory = true) {
+        this.currentPage = page;
+
+        if (pushToHistory) {
+            const url = page === 1 ? window.location.pathname : `${window.location.pathname}?page=${page}`;
+            history.pushState({ page }, '', url);
+        }
+
         try {
-            const response = await fetch('/api/simulations');
+            const response = await fetch(`/api/simulations?page=${page}`);
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to load simulations');
             }
-            
+
             this.renderSimulations(data.simulations);
+            this.renderPagination(data.page, data.totalPages);
         } catch (error) {
             this.simulationsList.innerHTML = `
                 <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> 
-                    Failed to load previous simulations: ${error.message}
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Failed to load previous simulations: ${this.escapeHtml(error.message)}
                 </div>
             `;
+            this.paginationControls.innerHTML = '';
         }
+    }
+
+    renderPagination(page, totalPages) {
+        if (totalPages <= 1) {
+            this.paginationControls.innerHTML = '';
+            return;
+        }
+
+        const maxVisible = 5;
+        let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage + 1 < maxVisible) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        const prevDisabled = page === 1;
+        const nextDisabled = page === totalPages;
+
+        let html = '<ul class="pagination mb-0">';
+
+        html += `<li class="page-item${prevDisabled ? ' disabled' : ''}">
+            <button class="page-link" data-page="${page - 1}"${prevDisabled ? ' tabindex="-1" aria-disabled="true"' : ''}>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </li>`;
+
+        if (startPage > 1) {
+            html += `<li class="page-item"><button class="page-link" data-page="1">1</button></li>`;
+            if (startPage > 2) {
+                html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item${i === page ? ' active' : ''}">
+                <button class="page-link" data-page="${i}">${i}</button>
+            </li>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            }
+            html += `<li class="page-item"><button class="page-link" data-page="${totalPages}">${totalPages}</button></li>`;
+        }
+
+        html += `<li class="page-item${nextDisabled ? ' disabled' : ''}">
+            <button class="page-link" data-page="${page + 1}"${nextDisabled ? ' tabindex="-1" aria-disabled="true"' : ''}>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </li>`;
+
+        html += '</ul>';
+
+        this.paginationControls.innerHTML = html;
+
+        this.paginationControls.querySelectorAll('button.page-link:not([aria-disabled])').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetPage = parseInt(btn.dataset.page);
+                this.loadSimulations(targetPage);
+            });
+        });
     }
     
     renderSimulations(simulations) {
