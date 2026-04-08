@@ -95,10 +95,12 @@ describe('API Endpoints', () => {
         .get('/api/simulations')
         .expect(200);
 
-      expect(response.body).toHaveProperty('count');
-      expect(response.body).toHaveProperty('simulations');
-      expect(Array.isArray(response.body.simulations)).toBe(true);
-      expect(typeof response.body.count).toBe('number');
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('currentPage');
+      expect(response.body).toHaveProperty('totalPages');
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(typeof response.body.currentPage).toBe('number');
+      expect(typeof response.body.totalPages).toBe('number');
     });
 
     test('should return simulations in correct format', async () => {
@@ -118,8 +120,8 @@ describe('API Endpoints', () => {
         .get('/api/simulations')
         .expect(200);
 
-      if (response.body.simulations.length > 0) {
-        const simulation = response.body.simulations[0];
+      if (response.body.data.length > 0) {
+        const simulation = response.body.data[0];
         expect(simulation).toHaveProperty('id');
         expect(simulation).toHaveProperty('name');
         expect(simulation).toHaveProperty('score');

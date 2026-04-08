@@ -116,6 +116,22 @@ class Database {
     });
   }
 
+  async getCustomersPaginated(page, pageSize) {
+    return new Promise((resolve, reject) => {
+      const offset = (page - 1) * pageSize;
+      const selectSQL = 'SELECT * FROM customers ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+
+      this.db.all(selectSQL, [pageSize, offset], (err, rows) => {
+        if (err) {
+          console.error('Error fetching customers paginated:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   async close() {
     return new Promise((resolve, reject) => {
       if (this.db) {
