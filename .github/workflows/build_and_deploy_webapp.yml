@@ -60,4 +60,5 @@ jobs:
           app-name: 'rifiel-creditsim-france'
           slot-name: 'Production'
           package: .
+          restart: true
           
