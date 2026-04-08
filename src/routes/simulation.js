@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const { database } = require('../database/database');
 const { calculateCreditScore, getScoringCriteria } = require('../services/creditScoring');
 
@@ -37,6 +37,14 @@ const validateIdParam = [
   param('id')
     .isInt({ min: 1 })
     .withMessage('ID must be a positive integer')
+];
+
+const validatePaginationQuery = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer')
+    .toInt()
 ];
 
 // Middleware to handle validation errors
@@ -97,16 +105,32 @@ router.post('/simulate', validateCustomerData, handleValidationErrors, async (re
   }
 });
 
+const PAGE_SIZE = 10;
+
 /**
  * GET /api/simulations
- * Get all previous simulations
+ * Get paginated simulation history
  */
-router.get('/simulations', async (req, res) => {
+router.get('/simulations', validatePaginationQuery, handleValidationErrors, async (req, res) => {
   try {
-    const simulations = await database.getAllCustomers();
-    
+    const page = req.query.page || 1;
+    const total = await database.countCustomers();
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    if (page > totalPages) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: [{ msg: `Page ${page} exceeds total pages (${totalPages})` }]
+      });
+    }
+
+    const simulations = await database.getCustomersPaginated(page, PAGE_SIZE);
+
     res.json({
-      count: simulations.length,
+      total,
+      page,
+      pageSize: PAGE_SIZE,
+      totalPages,
       simulations: simulations.map(sim => ({
         id: sim.id,
         name: sim.name,
@@ -116,7 +140,7 @@ router.get('/simulations', async (req, res) => {
         createdAt: sim.createdAt
       }))
     });
-    
+
   } catch (error) {
     console.error('Error in /simulations:', error);
     res.status(500).json({
