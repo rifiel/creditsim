@@ -26,7 +26,7 @@ function buildApp() {
   return { app, database, calculateCreditScore, getScoringCriteria };
 }
 
-describe('Simulation routes error handling', () => {
+describe('Simulation routes', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });

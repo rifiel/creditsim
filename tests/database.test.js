@@ -76,7 +76,7 @@ describe('Database module', () => {
     await database.connect();
 
     expect(mocks.DatabaseMock).toHaveBeenCalledWith(
-      path.join('/home/runner/work/creditsim/creditsim/src/database', '../../data/creditsim.db'),
+      path.join(__dirname, '../data/creditsim.db'),
       3,
       expect.any(Function)
     );
