@@ -4,6 +4,7 @@ class CreditSimulator {
     constructor() {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
+        this.emptyState = document.getElementById('emptyState');
         this.errorCard = document.getElementById('errorCard');
         this.simulationsList = document.getElementById('simulationsList');
         this.refreshBtn = document.getElementById('refreshBtn');
@@ -111,9 +112,9 @@ class CreditSimulator {
             this.renderSimulations(data.simulations);
         } catch (error) {
             this.simulationsList.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> 
-                    Failed to load previous simulations: ${error.message}
+                <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:1rem 1.25rem;color:#f59e0b;font-size:0.85rem;">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Failed to load previous simulations: ${this.escapeHtml(error.message)}
                 </div>
             `;
         }
@@ -122,9 +123,9 @@ class CreditSimulator {
     renderSimulations(simulations) {
         if (simulations.length === 0) {
             this.simulationsList.innerHTML = `
-                <div class="text-center text-muted">
-                    <i class="bi bi-inbox"></i><br>
-                    No simulations yet. Submit your first calculation above!
+                <div class="empty-history">
+                    <i class="bi bi-inbox"></i>
+                    <p>No simulations yet. Run your first simulation above!</p>
                 </div>
             `;
             return;
@@ -132,63 +133,94 @@ class CreditSimulator {
         
         const simulationsHtml = simulations.map(sim => {
             const riskClass = this.getRiskClass(sim.riskCategory);
-            const riskBadgeClass = this.getRiskBadgeClass(sim.riskCategory);
+            const scoreClass = riskClass.replace('-risk', '-score');
+            const badgeClass = riskClass.replace('-risk', '-badge');
             
             return `
                 <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card simulation-item h-100 ${riskClass}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">${this.escapeHtml(sim.name)}</h6>
-                                <span class="badge ${riskBadgeClass}">${sim.riskCategory}</span>
+                    <div class="sim-card ${riskClass}">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="sim-card-name" title="${this.escapeHtml(sim.name)}">${this.escapeHtml(sim.name)}</div>
+                            <span class="sim-badge ${badgeClass}">${this.escapeHtml(sim.riskCategory)}</span>
+                        </div>
+                        <div class="d-flex align-items-end justify-content-between">
+                            <div>
+                                <div class="sim-score ${scoreClass}">${sim.score}</div>
+                                <div class="sim-meta">Credit Score</div>
                             </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="h4 mb-0">${sim.score}</div>
-                                    <small class="text-muted">Credit Score</small>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <div class="fw-bold">$${sim.loanAmount.toLocaleString()}</div>
-                                    <small class="text-muted">Loan Amount</small>
-                                </div>
+                            <div class="text-end">
+                                <div class="sim-loan">$${sim.loanAmount.toLocaleString()}</div>
+                                <div class="sim-meta">Loan Amount</div>
                             </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> 
-                                    ${this.formatDate(sim.createdAt)}
-                                </small>
-                            </div>
+                        </div>
+                        <div class="sim-date">
+                            <i class="bi bi-clock me-1"></i>${this.formatDate(sim.createdAt)}
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
         
-        this.simulationsList.innerHTML = `
-            <div class="row">
-                ${simulationsHtml}
-            </div>
-        `;
+        this.simulationsList.innerHTML = `<div class="row">${simulationsHtml}</div>`;
     }
     
+    // ── Score Gauge ─────────────────────────────────────────────
+    drawScoreGauge(score, riskCategory) {
+        const MIN = 300, MAX = 850;
+        const cx = 110, cy = 115, r = 90;
+
+        // Compute arc end point for the given score
+        const ratio = (score - MIN) / (MAX - MIN);         // 0..1
+        const angleDeg = -180 + ratio * 180;               // -180° (left) → 0° (right)
+        const angleRad = angleDeg * Math.PI / 180;
+        const x = cx + r * Math.cos(angleRad);
+        const y = cy + r * Math.sin(angleRad);
+        const largeArc = ratio > 0.5 ? 1 : 0;
+
+        const colorMap = {
+            'Low risk':    '#10b981',
+            'Medium risk': '#f59e0b',
+            'High risk':   '#ef4444'
+        };
+        const color = colorMap[riskCategory] || '#6366f1';
+
+        const arcPath = document.getElementById('gaugeArc');
+        const needle   = document.getElementById('gaugeNeedle');
+
+        if (arcPath) {
+            arcPath.setAttribute('d', `M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${x} ${y}`);
+            arcPath.setAttribute('stroke', color);
+        }
+        if (needle) {
+            needle.setAttribute('cx', x);
+            needle.setAttribute('cy', y);
+            needle.setAttribute('fill', color);
+        }
+    }
+
     showResult(result) {
         const { score, riskCategory, customer } = result;
         
-        // Update result card
+        // Update score number
         document.getElementById('scoreNumber').textContent = score;
         document.getElementById('customerName').textContent = `for ${customer.name}`;
         document.getElementById('resultLoanAmount').textContent = `$${customer.loanAmount.toLocaleString()}`;
         document.getElementById('resultIncome').textContent = `$${customer.annualIncome.toLocaleString()}`;
         
-        // Update risk category badge
+        // Update risk badge
         const riskBadge = document.getElementById('riskCategory');
-        riskBadge.textContent = riskCategory;
-        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskCategory)}`;
-        
-        // Update card styling
-        this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
-        
+        const riskClass = this.getRiskClass(riskCategory);
+        const riskMod = riskClass.replace('-risk', '');   // 'low' | 'medium' | 'high'
+        riskBadge.className = `risk-badge mx-auto risk-${riskMod}`;
+        riskBadge.innerHTML = `<span class="risk-badge-dot dot-${riskMod}"></span><span>${this.escapeHtml(riskCategory)}</span>`;
+
+        // Draw gauge
+        this.drawScoreGauge(score, riskCategory);
+
+        // Show result panel, hide empty state
+        if (this.emptyState) this.emptyState.classList.add('d-none');
         this.resultCard.classList.remove('d-none');
+        this._hasResult = true;
     }
     
     showError(message) {
@@ -199,34 +231,38 @@ class CreditSimulator {
     hideCards() {
         this.resultCard.classList.add('d-none');
         this.errorCard.classList.add('d-none');
+        // Keep emptyState hidden once a result has been shown; show it if no result yet
+        if (this.emptyState && !this._hasResult) {
+            this.emptyState.classList.remove('d-none');
+        }
     }
     
     showLoading() {
-        const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculating...';
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating…';
         submitBtn.disabled = true;
     }
     
     hideLoading() {
-        const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-calculator"></i> Calculate Credit Score';
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="bi bi-lightning-charge-fill me-2"></i>Run Simulation';
         submitBtn.disabled = false;
     }
     
     getRiskClass(riskCategory) {
         switch (riskCategory) {
-            case 'Low risk': return 'low-risk';
+            case 'Low risk':    return 'low-risk';
             case 'Medium risk': return 'medium-risk';
-            case 'High risk': return 'high-risk';
+            case 'High risk':   return 'high-risk';
             default: return '';
         }
     }
     
     getRiskBadgeClass(riskCategory) {
         switch (riskCategory) {
-            case 'Low risk': return 'bg-success';
+            case 'Low risk':    return 'bg-success';
             case 'Medium risk': return 'bg-warning text-dark';
-            case 'High risk': return 'bg-danger';
+            case 'High risk':   return 'bg-danger';
             default: return 'bg-secondary';
         }
     }
