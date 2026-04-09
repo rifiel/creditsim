@@ -1,5 +1,9 @@
 const path = require('path');
 
+function resolveCallback(params, callback) {
+  return typeof params === 'function' ? params : callback;
+}
+
 function loadDatabaseModule({
   openError = null,
   runError = null,
@@ -14,7 +18,7 @@ function loadDatabaseModule({
   jest.resetModules();
 
   const runMock = jest.fn((sql, params, callback) => {
-    const cb = typeof params === 'function' ? params : callback;
+    const cb = resolveCallback(params, callback);
     if (cb) {
       cb.call({ lastID }, runError);
     }

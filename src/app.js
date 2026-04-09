@@ -33,12 +33,6 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Routes
 app.use('/api', simulationRoutes);
 
-// Serve the HTML form at root
-const rootHandler = (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-};
-app.get('/', rootHandler);
-
 // Global error handler
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
@@ -90,7 +84,6 @@ if (require.main === module) {
 }
 
 app.startServer = startServer;
-app.rootHandler = rootHandler;
 app.errorHandler = errorHandler;
 app.notFoundHandler = notFoundHandler;
 app.handleSigint = handleSigint;

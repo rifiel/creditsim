@@ -2,8 +2,6 @@ const express = require('express');
 const request = require('supertest');
 
 function buildApp() {
-  jest.resetModules();
-
   const database = {
     insertCustomer: jest.fn(),
     getAllCustomers: jest.fn(),
@@ -27,6 +25,10 @@ function buildApp() {
 }
 
 describe('Simulation routes', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
