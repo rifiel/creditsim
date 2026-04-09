@@ -96,6 +96,28 @@ describe('Credit Scoring Service', () => {
       expect(result.riskCategory).toBe('High risk');
     });
 
+    test('should apply high income bonus for income over 100000', () => {
+      const highIncomeCustomer = { ...baseCustomer, annualIncome: 120000 };
+      const result = calculateCreditScore(highIncomeCustomer);
+
+      // Base (600) + high income bonus (80) + low loan-to-income bonus (15) = 695
+      expect(result.score).toBe(695);
+      expect(result.riskCategory).toBe('Medium risk');
+    });
+
+    test('should apply very high income and very low loan-to-income bonuses', () => {
+      const veryHighIncomeCustomer = {
+        ...baseCustomer,
+        annualIncome: 250000,
+        loanAmount: 1000
+      };
+      const result = calculateCreditScore(veryHighIncomeCustomer);
+
+      // Base (600) + very high income bonus (120) + very low loan-to-income bonus (30) = 750
+      expect(result.score).toBe(750);
+      expect(result.riskCategory).toBe('Low risk');
+    });
+
     test('should cap score at maximum 850', () => {
       // This test demonstrates that even with impossible good conditions, score is capped
       const perfectCustomer = {
