@@ -241,4 +241,81 @@ describe('API Endpoints', () => {
       expect(response.body.error).toBe('Endpoint not found');
     });
   });
+
+  describe('Route error handling (database failures)', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('POST /api/simulate - should return 500 when database insert fails', async () => {
+      jest.spyOn(database, 'insertCustomer').mockRejectedValue(new Error('Database insert failed'));
+
+      const response = await request(app)
+        .post('/api/simulate')
+        .send({
+          name: 'Error Test',
+          age: 35,
+          annualIncome: 60000,
+          debtToIncomeRatio: 0.3,
+          loanAmount: 25000,
+          creditHistory: 'good'
+        })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to calculate credit score');
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('GET /api/simulations - should return 500 when database fetch fails', async () => {
+      jest.spyOn(database, 'getAllCustomers').mockRejectedValue(new Error('Database fetch failed'));
+
+      const response = await request(app)
+        .get('/api/simulations')
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to fetch simulations');
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('GET /api/simulation/:id - should return 500 when database fetch fails', async () => {
+      jest.spyOn(database, 'getCustomerById').mockRejectedValue(new Error('Database fetch failed'));
+
+      const response = await request(app)
+        .get('/api/simulation/1')
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Failed to fetch simulation');
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  describe('Database utility methods', () => {
+    test('countCustomers should return a non-negative integer', async () => {
+      const count = await database.countCustomers();
+      expect(typeof count).toBe('number');
+      expect(Number.isInteger(count)).toBe(true);
+      expect(count).toBeGreaterThanOrEqual(0);
+    });
+
+    test('countCustomers should reflect newly inserted records', async () => {
+      const countBefore = await database.countCustomers();
+
+      await database.insertCustomer({
+        name: 'Count Test User',
+        age: 30,
+        annualIncome: 50000,
+        debtToIncomeRatio: 0.3,
+        loanAmount: 15000,
+        creditHistory: 'good',
+        score: 640,
+        riskCategory: 'High risk'
+      });
+
+      const countAfter = await database.countCustomers();
+      expect(countAfter).toBe(countBefore + 1);
+    });
+  });
 });

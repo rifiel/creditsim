@@ -112,6 +112,86 @@ describe('Credit Scoring Service', () => {
       // Base (600) + income bonus (80) + low loan-to-income bonus (30) = 710
       expect(result.riskCategory).toBe('Medium risk');
     });
+
+    test('should apply very high income bonus for income over 200000', () => {
+      const veryHighIncomeCustomer = {
+        ...baseCustomer,
+        annualIncome: 250000,
+        loanAmount: 10000 // ratio = 10000/250000 = 0.04 < 0.1, +30 bonus
+      };
+      const result = calculateCreditScore(veryHighIncomeCustomer);
+      // Base (600) + very high income bonus (120) + very low loan-to-income bonus (30) = 750
+      expect(result.score).toBe(750);
+      expect(result.riskCategory).toBe('Low risk');
+    });
+
+    test('should apply high income bonus for income over 100000', () => {
+      const highIncomeCustomer = {
+        ...baseCustomer,
+        annualIncome: 150000,
+        loanAmount: 10000 // ratio = 10000/150000 = 0.0667 < 0.1, +30 bonus
+      };
+      const result = calculateCreditScore(highIncomeCustomer);
+      // Base (600) + high income bonus (80) + very low loan-to-income bonus (30) = 710
+      expect(result.score).toBe(710);
+      expect(result.riskCategory).toBe('Medium risk');
+    });
+
+    test('should apply low loan-to-income bonus for ratio between 0.1 and 0.25', () => {
+      const customer = {
+        ...baseCustomer,
+        loanAmount: 12000 // ratio = 12000/60000 = 0.2, between 0.1 and 0.25
+      };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) + low loan-to-income bonus (15) = 655
+      expect(result.score).toBe(655);
+      expect(result.riskCategory).toBe('Medium risk');
+    });
+
+    test('should not apply age penalty for customers exactly aged 25', () => {
+      const customer = { ...baseCustomer, age: 25 };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) = 640, no penalty (age < 25 required)
+      expect(result.score).toBe(640);
+    });
+
+    test('should not apply age penalty for customers exactly aged 60', () => {
+      const customer = { ...baseCustomer, age: 60 };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) = 640, no penalty (age > 60 required)
+      expect(result.score).toBe(640);
+    });
+
+    test('should not apply income bonus for income exactly 50000', () => {
+      const customer = { ...baseCustomer, annualIncome: 50000 };
+      // loanToIncomeRatio = 25000/50000 = 0.5, exactly at boundary (> 0.5 needed for penalty)
+      const result = calculateCreditScore(customer);
+      // Base (600), no income bonus (> 50000 required), no loan penalty (not > 0.5)
+      expect(result.score).toBe(600);
+    });
+
+    test('should not apply debt-to-income penalty for ratio exactly 0.4', () => {
+      const customer = { ...baseCustomer, debtToIncomeRatio: 0.4 };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) = 640, no DTI penalty (> 0.4 required)
+      expect(result.score).toBe(640);
+    });
+
+    test('should accept minimum valid age of 18', () => {
+      const customer = { ...baseCustomer, age: 18 };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) - young age penalty (50) = 590
+      expect(result.score).toBe(590);
+      expect(result.riskCategory).toBe('High risk');
+    });
+
+    test('should accept maximum valid age of 120', () => {
+      const customer = { ...baseCustomer, age: 120 };
+      const result = calculateCreditScore(customer);
+      // Base (600) + income bonus (40) - senior age penalty (30) = 610
+      expect(result.score).toBe(610);
+      expect(result.riskCategory).toBe('High risk');
+    });
   });
 
   describe('determineRiskCategory', () => {
@@ -131,6 +211,22 @@ describe('Credit Scoring Service', () => {
       expect(determineRiskCategory(300)).toBe('High risk');
       expect(determineRiskCategory(500)).toBe('High risk');
       expect(determineRiskCategory(649)).toBe('High risk');
+    });
+
+    test('should classify score exactly 749 as Medium risk (boundary)', () => {
+      expect(determineRiskCategory(749)).toBe('Medium risk');
+    });
+
+    test('should classify score exactly 750 as Low risk (boundary)', () => {
+      expect(determineRiskCategory(750)).toBe('Low risk');
+    });
+
+    test('should classify score exactly 649 as High risk (boundary)', () => {
+      expect(determineRiskCategory(649)).toBe('High risk');
+    });
+
+    test('should classify score exactly 650 as Medium risk (boundary)', () => {
+      expect(determineRiskCategory(650)).toBe('Medium risk');
     });
   });
 
@@ -201,6 +297,36 @@ describe('Credit Scoring Service', () => {
 
       expect(() => validateCustomerData(invalidCustomer))
         .toThrow(/Validation failed:/);
+    });
+
+    test('should accept boundary age 18', () => {
+      expect(() => validateCustomerData({ ...validCustomer, age: 18 })).not.toThrow();
+    });
+
+    test('should accept boundary age 120', () => {
+      expect(() => validateCustomerData({ ...validCustomer, age: 120 })).not.toThrow();
+    });
+
+    test('should throw error for age 17 (below minimum)', () => {
+      expect(() => validateCustomerData({ ...validCustomer, age: 17 }))
+        .toThrow(/Age must be an integer between 18 and 120/);
+    });
+
+    test('should throw error for age 121 (above maximum)', () => {
+      expect(() => validateCustomerData({ ...validCustomer, age: 121 }))
+        .toThrow(/Age must be an integer between 18 and 120/);
+    });
+
+    test('should accept debt-to-income ratio of 0', () => {
+      expect(() => validateCustomerData({ ...validCustomer, debtToIncomeRatio: 0 })).not.toThrow();
+    });
+
+    test('should accept debt-to-income ratio of 1', () => {
+      expect(() => validateCustomerData({ ...validCustomer, debtToIncomeRatio: 1 })).not.toThrow();
+    });
+
+    test('should accept annual income of 0 (zero income is valid per validation rule >= 0)', () => {
+      expect(() => validateCustomerData({ ...validCustomer, annualIncome: 0 })).not.toThrow();
     });
   });
 
