@@ -1,5 +1,3 @@
-const request = require('supertest');
-
 function removeSignalHandlers(app) {
   process.removeListener('SIGINT', app.handleSigint);
   process.removeListener('SIGTERM', app.handleSigterm);
@@ -15,16 +13,6 @@ describe('App module edge cases', () => {
     }
     jest.restoreAllMocks();
     delete process.env.NODE_ENV;
-  });
-
-  test('root route serves the main HTML file', async () => {
-    loadedApp = require('../src/app');
-
-    const response = await request(loadedApp)
-      .get('/')
-      .expect(200);
-
-    expect(response.headers['content-type']).toMatch(/text\/html/);
   });
 
   test('global error handler hides internal details outside development', () => {

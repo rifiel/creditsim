@@ -34,6 +34,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', simulationRoutes);
 
 // Global error handler
+/**
+ * Handle uncaught application errors.
+ * Exposes the original message only in development mode.
+ */
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ 
@@ -44,6 +48,9 @@ const errorHandler = (err, req, res, next) => {
 app.use(errorHandler);
 
 // 404 handler
+/**
+ * Return a JSON 404 response for unmatched routes.
+ */
 const notFoundHandler = (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 };
@@ -66,11 +73,17 @@ async function startServer() {
 }
 
 // Handle graceful shutdown
+/**
+ * Handle SIGINT by logging and terminating the process.
+ */
 const handleSigint = () => {
   console.log('\nReceived SIGINT. Graceful shutdown...');
   process.exit(0);
 };
 
+/**
+ * Handle SIGTERM by logging and terminating the process.
+ */
 const handleSigterm = () => {
   console.log('\nReceived SIGTERM. Graceful shutdown...');
   process.exit(0);
