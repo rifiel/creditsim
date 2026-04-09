@@ -49,16 +49,11 @@ describe('Database', () => {
   });
 
   describe('close', () => {
-    test('close should resolve without error', async () => {
-      // close is already called in afterAll; test that it resolves correctly
-      // We test a fresh connection/close cycle here
-      const { Database } = (() => {
-        // Access the Database class via prototype introspection
-        return { Database: Object.getPrototypeOf(database).constructor };
-      })();
-
+    test('close should resolve without error on unconnected instance', async () => {
+      // Access Database class via prototype to create a fresh unconnected instance
+      const Database = Object.getPrototypeOf(database).constructor;
       const freshDb = new Database();
-      // close() on an unconnected instance should resolve (db is null)
+      // close() on an unconnected instance (db is null) should resolve immediately
       await expect(freshDb.close()).resolves.toBeUndefined();
     });
   });

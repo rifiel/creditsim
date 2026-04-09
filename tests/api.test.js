@@ -310,8 +310,8 @@ describe('API Endpoints', () => {
         debtToIncomeRatio: 0.3,
         loanAmount: 15000,
         creditHistory: 'good',
-        score: 640,
-        riskCategory: 'High risk'
+        score: 700,
+        riskCategory: 'Medium risk'
       });
 
       const countAfter = await database.countCustomers();
