@@ -200,7 +200,7 @@ git --version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/mooncowboy/creditsim.git
+git clone https://github.com/rifiel/creditsim.git
 cd creditsim
 ```
 
@@ -1047,7 +1047,7 @@ When adding new features:
 
 1. **Clone and install:**
    ```bash
-   git clone https://github.com/mooncowboy/creditsim.git
+   git clone https://github.com/rifiel/creditsim.git
    cd creditsim
    npm install
    npm run db:setup
@@ -1301,7 +1301,7 @@ NODE_ENV=production
 1. **Install Node.js** on server
 2. **Clone repository:**
    ```bash
-   git clone https://github.com/mooncowboy/creditsim.git
+   git clone https://github.com/rifiel/creditsim.git
    cd creditsim
    ```
 3. **Install dependencies:**
@@ -1346,13 +1346,18 @@ docker run -p 3000:3000 creditsim
 
 The repository includes a GitHub Actions workflow for Azure deployment:
 
-`.github/workflows/main_rifiel-creditsim-france.yml`
+`.github/workflows/build_and_deploy_webapp.yml`
+
+This workflow:
+- Triggers automatically on push to `main` (or manually via `workflow_dispatch`)
+- Builds and tests the app using Node.js 22.x
+- Deploys to Azure Web App **rifiel-creditsim-france** (Production slot)
 
 Configure:
-1. Create Azure App Service (Node.js)
+1. Create Azure App Service (Node.js 22.x) named `rifiel-creditsim-france`
 2. Set up GitHub secrets:
-   - `AZUREAPPSERVICE_PUBLISHPROFILE`
-3. Push to trigger deployment
+   - `AZURE_CREDENTIALS` (JSON credentials from `az ad sp create-for-rbac`)
+3. Push to `main` to trigger deployment
 
 #### Option 4: Heroku
 
@@ -1565,8 +1570,8 @@ For real credit scoring, consult professional credit risk management systems and
 
 ## Contact & Support
 
-- **Repository**: https://github.com/mooncowboy/creditsim
-- **Issues**: https://github.com/mooncowboy/creditsim/issues
+- **Repository**: https://github.com/rifiel/creditsim
+- **Issues**: https://github.com/rifiel/creditsim/issues
 - **License**: MIT
 
 ---
