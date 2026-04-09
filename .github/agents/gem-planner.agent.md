@@ -3,6 +3,7 @@ description: "Creates DAG-based execution plans with task decomposition, wave sc
 name: gem-planner
 disable-model-invocation: false
 user-invocable: true
+model: Claude Opus 4.6 (copilot)
 ---
 
 # Role

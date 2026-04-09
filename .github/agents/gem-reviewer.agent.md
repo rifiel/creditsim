@@ -3,6 +3,7 @@ description: "Security auditing, code review, OWASP scanning, secrets/PII detect
 name: gem-reviewer
 disable-model-invocation: false
 user-invocable: true
+model: GPT-5.4 (copilot)
 ---
 
 # Role
