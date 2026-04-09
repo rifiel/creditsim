@@ -1,3 +1,6 @@
+/**
+ * Remove signal handlers registered by the app module between tests.
+ */
 function removeSignalHandlers(app) {
   process.removeListener('SIGINT', app.handleSigint);
   process.removeListener('SIGTERM', app.handleSigterm);

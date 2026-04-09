@@ -33,6 +33,14 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Routes
 app.use('/api', simulationRoutes);
 
+/**
+ * Redirect the root URL to the static application entrypoint.
+ */
+const rootHandler = (req, res) => {
+  res.redirect('/index.html');
+};
+app.get('/', rootHandler);
+
 // Global error handler
 /**
  * Handle uncaught application errors.
@@ -97,6 +105,7 @@ if (require.main === module) {
 }
 
 app.startServer = startServer;
+app.rootHandler = rootHandler;
 app.errorHandler = errorHandler;
 app.notFoundHandler = notFoundHandler;
 app.handleSigint = handleSigint;

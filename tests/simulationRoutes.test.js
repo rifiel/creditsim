@@ -1,6 +1,9 @@
 const express = require('express');
 const request = require('supertest');
 
+/**
+ * Build an isolated Express app instance with mocked route dependencies.
+ */
 function buildApp() {
   const database = {
     insertCustomer: jest.fn(),

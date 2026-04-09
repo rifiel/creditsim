@@ -20,7 +20,7 @@ function loadDatabaseModule({
   const runMock = jest.fn((sql, params, callback) => {
     const cb = resolveCallback(params, callback);
     if (cb) {
-      cb.call({ lastID }, runError);
+      cb.call(runError ? {} : { lastID }, runError);
     }
   });
   const allMock = jest.fn((sql, params, callback) => callback(allError, allRows));
