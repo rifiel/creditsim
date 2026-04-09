@@ -1,6 +1,10 @@
 // Credit Risk Simulator Frontend JavaScript
 
 class CreditSimulator {
+    // Button label constants
+    static BTN_DEFAULT = '<i class="bi bi-calculator me-1"></i>Run Credit Assessment';
+    static BTN_LOADING = '<i class="bi bi-hourglass-split me-1"></i>Calculating…';
+
     constructor() {
         this.form = document.getElementById('creditForm');
         this.resultCard = document.getElementById('resultCard');
@@ -122,112 +126,127 @@ class CreditSimulator {
     renderSimulations(simulations) {
         if (simulations.length === 0) {
             this.simulationsList.innerHTML = `
-                <div class="text-center text-muted">
-                    <i class="bi bi-inbox"></i><br>
-                    No simulations yet. Submit your first calculation above!
+                <div class="state-empty">
+                    <i class="bi bi-inbox d-block mb-2" style="font-size:1.5rem;"></i>
+                    No simulations yet. Submit your first assessment above.
                 </div>
             `;
             return;
         }
-        
-        const simulationsHtml = simulations.map(sim => {
-            const riskClass = this.getRiskClass(sim.riskCategory);
-            const riskBadgeClass = this.getRiskBadgeClass(sim.riskCategory);
-            
+
+        const rows = simulations.map(sim => {
+            const badgeClass = this.getRiskBadgeClass(sim.riskCategory);
             return `
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card simulation-item h-100 ${riskClass}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">${this.escapeHtml(sim.name)}</h6>
-                                <span class="badge ${riskBadgeClass}">${sim.riskCategory}</span>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="h4 mb-0">${sim.score}</div>
-                                    <small class="text-muted">Credit Score</small>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <div class="fw-bold">$${sim.loanAmount.toLocaleString()}</div>
-                                    <small class="text-muted">Loan Amount</small>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> 
-                                    ${this.formatDate(sim.createdAt)}
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <tr>
+                    <td class="fw-medium">${this.escapeHtml(sim.name)}</td>
+                    <td><span class="score-pill">${sim.score}</span></td>
+                    <td><span class="risk-badge ${badgeClass}">${sim.riskCategory}</span></td>
+                    <td>$${sim.loanAmount.toLocaleString()}</td>
+                    <td class="text-muted">${this.formatDate(sim.createdAt)}</td>
+                </tr>
             `;
         }).join('');
-        
+
         this.simulationsList.innerHTML = `
-            <div class="row">
-                ${simulationsHtml}
+            <div class="table-responsive">
+                <table class="table sim-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Score</th>
+                            <th>Risk Level</th>
+                            <th>Loan Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
             </div>
         `;
     }
     
     showResult(result) {
         const { score, riskCategory, customer } = result;
-        
-        // Update result card
+
+        // Score and customer details
         document.getElementById('scoreNumber').textContent = score;
-        document.getElementById('customerName').textContent = `for ${customer.name}`;
+        document.getElementById('customerName').textContent = customer.name;
         document.getElementById('resultLoanAmount').textContent = `$${customer.loanAmount.toLocaleString()}`;
         document.getElementById('resultIncome').textContent = `$${customer.annualIncome.toLocaleString()}`;
-        
-        // Update risk category badge
-        const riskBadge = document.getElementById('riskCategory');
-        riskBadge.textContent = riskCategory;
-        riskBadge.className = `badge fs-6 mb-3 ${this.getRiskBadgeClass(riskCategory)}`;
-        
-        // Update card styling
-        this.resultCard.className = `card score-card ${this.getRiskClass(riskCategory)}`;
-        
-        this.resultCard.classList.remove('d-none');
+
+        // Risk category indicator
+        const riskEl = document.getElementById('riskCategory');
+        const riskIcon = riskCategory === 'Low risk'    ? 'bi-check-circle' :
+                         riskCategory === 'Medium risk' ? 'bi-dash-circle'  : 'bi-x-circle';
+        riskEl.className = `risk-indicator ${this.getRiskIndicatorClass(riskCategory)}`;
+        riskEl.innerHTML = `<i class="bi ${riskIcon}"></i>${riskCategory}`;
+
+        // Score bar: FICO range is 300–850 (span of 550 points)
+        const scoreBar = document.getElementById('scoreBar');
+        const pct = Math.max(0, Math.min(100, ((score - 300) / 550) * 100));
+        scoreBar.style.width = pct + '%';
+        scoreBar.className = `score-bar score-bar-${this.getRiskBarClass(riskCategory)}`;
+
+        // Panel left-border accent
+        this.resultCard.className = `panel ${this.getRiskClass(riskCategory)} mb-4`;
+        this.resultCard.style.display = '';
     }
     
     showError(message) {
         document.getElementById('errorMessage').textContent = message;
-        this.errorCard.classList.remove('d-none');
+        this.errorCard.style.display = '';
     }
     
     hideCards() {
-        this.resultCard.classList.add('d-none');
-        this.errorCard.classList.add('d-none');
+        this.resultCard.style.display = 'none';
+        this.errorCard.style.display = 'none';
     }
     
     showLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculating...';
+        submitBtn.innerHTML = CreditSimulator.BTN_LOADING;
         submitBtn.disabled = true;
     }
     
     hideLoading() {
         const submitBtn = this.form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="bi bi-calculator"></i> Calculate Credit Score';
+        submitBtn.innerHTML = CreditSimulator.BTN_DEFAULT;
         submitBtn.disabled = false;
     }
     
     getRiskClass(riskCategory) {
         switch (riskCategory) {
-            case 'Low risk': return 'low-risk';
-            case 'Medium risk': return 'medium-risk';
-            case 'High risk': return 'high-risk';
-            default: return '';
+            case 'Low risk':    return 'result-low';
+            case 'Medium risk': return 'result-medium';
+            case 'High risk':   return 'result-high';
+            default:            return '';
         }
     }
     
     getRiskBadgeClass(riskCategory) {
         switch (riskCategory) {
-            case 'Low risk': return 'bg-success';
-            case 'Medium risk': return 'bg-warning text-dark';
-            case 'High risk': return 'bg-danger';
-            default: return 'bg-secondary';
+            case 'Low risk':    return 'risk-badge-low';
+            case 'Medium risk': return 'risk-badge-medium';
+            case 'High risk':   return 'risk-badge-high';
+            default:            return 'risk-badge-default';
+        }
+    }
+
+    getRiskIndicatorClass(riskCategory) {
+        switch (riskCategory) {
+            case 'Low risk':    return 'risk-low';
+            case 'Medium risk': return 'risk-medium';
+            case 'High risk':   return 'risk-high';
+            default:            return '';
+        }
+    }
+
+    getRiskBarClass(riskCategory) {
+        switch (riskCategory) {
+            case 'Low risk':    return 'low';
+            case 'Medium risk': return 'medium';
+            case 'High risk':   return 'high';
+            default:            return 'low';
         }
     }
     
