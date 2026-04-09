@@ -30,7 +30,7 @@ function loadDatabaseModule({
       get: getMock,
       close: closeMock
     };
-    callback(openError);
+    process.nextTick(() => callback(openError));
     return instance;
   });
 
