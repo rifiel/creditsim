@@ -1,9 +1,6 @@
-function getRouteLayer(app, path) {
-  return app._router.stack.find((layer) => layer.route && layer.route.path === path);
-}
-
-function getErrorHandler(app) {
-  return app._router.stack.find((layer) => layer.handle.length === 4);
+function removeSignalHandlers(app) {
+  process.removeListener('SIGINT', app.handleSigint);
+  process.removeListener('SIGTERM', app.handleSigterm);
 }
 
 describe('App module edge cases', () => {
@@ -14,77 +11,105 @@ describe('App module edge cases', () => {
 
   test('root route sends the main HTML file', () => {
     const app = require('../src/app');
-    const routeLayer = getRouteLayer(app, '/');
     const sendFile = jest.fn();
 
-    routeLayer.route.stack[0].handle({}, { sendFile });
+    app.rootHandler({}, { sendFile });
 
     expect(sendFile).toHaveBeenCalledWith(expect.stringMatching(/public\/index\.html$/));
+    removeSignalHandlers(app);
   });
 
   test('global error handler hides internal details outside development', () => {
     const app = require('../src/app');
-    const errorLayer = getErrorHandler(app);
     const status = jest.fn().mockReturnThis();
     const json = jest.fn();
 
-    errorLayer.handle(new Error('sensitive details'), {}, { status, json }, jest.fn());
+    app.errorHandler(new Error('sensitive details'), {}, { status, json }, jest.fn());
 
     expect(status).toHaveBeenCalledWith(500);
     expect(json).toHaveBeenCalledWith({
       error: 'Something went wrong!',
       message: 'Internal server error'
     });
+    removeSignalHandlers(app);
   });
 
   test('global error handler returns the real error message in development', () => {
     process.env.NODE_ENV = 'development';
     const app = require('../src/app');
-    const errorLayer = getErrorHandler(app);
     const status = jest.fn().mockReturnThis();
     const json = jest.fn();
 
-    errorLayer.handle(new Error('visible details'), {}, { status, json }, jest.fn());
+    app.errorHandler(new Error('visible details'), {}, { status, json }, jest.fn());
 
     expect(json).toHaveBeenCalledWith({
       error: 'Something went wrong!',
       message: 'visible details'
     });
+    removeSignalHandlers(app);
+  });
+
+  test('startServer initializes the database and starts listening', async () => {
+    jest.resetModules();
+
+    const initializeDatabase = jest.fn().mockResolvedValue(undefined);
+    jest.doMock('../src/database/database', () => ({ initializeDatabase }));
+
+    const app = require('../src/app');
+    const listenSpy = jest.spyOn(app, 'listen').mockImplementation((port, callback) => {
+      callback();
+      return {};
+    });
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await app.startServer();
+
+    expect(initializeDatabase).toHaveBeenCalledTimes(1);
+    expect(listenSpy).toHaveBeenCalledWith(3000, expect.any(Function));
+    expect(consoleSpy).toHaveBeenCalledWith('Database initialized successfully');
+
+    removeSignalHandlers(app);
+  });
+
+  test('startServer exits the process when initialization fails', async () => {
+    jest.resetModules();
+
+    const initializeDatabase = jest.fn().mockRejectedValue(new Error('boot failed'));
+    jest.doMock('../src/database/database', () => ({ initializeDatabase }));
+
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    const app = require('../src/app');
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await app.startServer();
+
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to start server:', expect.any(Error));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+
+    removeSignalHandlers(app);
   });
 
   test('SIGINT handler exits the process cleanly', () => {
     const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const baselineListeners = process.listeners('SIGINT');
+    const app = require('../src/app');
 
-    jest.isolateModules(() => {
-      require('../src/app');
-    });
-
-    const sigintHandler = process.listeners('SIGINT').find((listener) => !baselineListeners.includes(listener));
-    sigintHandler();
+    app.handleSigint();
 
     expect(consoleSpy).toHaveBeenCalledWith('\nReceived SIGINT. Graceful shutdown...');
     expect(exitSpy).toHaveBeenCalledWith(0);
-
-    process.removeListener('SIGINT', sigintHandler);
+    removeSignalHandlers(app);
   });
 
   test('SIGTERM handler exits the process cleanly', () => {
     const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const baselineListeners = process.listeners('SIGTERM');
+    const app = require('../src/app');
 
-    jest.isolateModules(() => {
-      require('../src/app');
-    });
-
-    const sigtermHandler = process.listeners('SIGTERM').find((listener) => !baselineListeners.includes(listener));
-    sigtermHandler();
+    app.handleSigterm();
 
     expect(consoleSpy).toHaveBeenCalledWith('\nReceived SIGTERM. Graceful shutdown...');
     expect(exitSpy).toHaveBeenCalledWith(0);
-
-    process.removeListener('SIGTERM', sigtermHandler);
+    removeSignalHandlers(app);
   });
 });

@@ -135,14 +135,22 @@ describe('Database module', () => {
     })).rejects.toThrow('insert failed');
   });
 
-  test('getAllCustomers and getCustomerById reject when SQLite queries fail', async () => {
-    const error = new Error('query failed');
-    const { database } = loadDatabaseModule({ allError: error, getError: error });
+  test('getAllCustomers rejects when SQLite query fails', async () => {
+    const error = new Error('list failed');
+    const { database } = loadDatabaseModule({ allError: error });
 
     await database.connect();
 
-    await expect(database.getAllCustomers()).rejects.toThrow('query failed');
-    await expect(database.getCustomerById(1)).rejects.toThrow('query failed');
+    await expect(database.getAllCustomers()).rejects.toThrow('list failed');
+  });
+
+  test('getCustomerById rejects when SQLite query fails', async () => {
+    const error = new Error('lookup failed');
+    const { database } = loadDatabaseModule({ getError: error });
+
+    await database.connect();
+
+    await expect(database.getCustomerById(1)).rejects.toThrow('lookup failed');
   });
 
   test('countCustomers returns the stored row count', async () => {

@@ -34,23 +34,26 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', simulationRoutes);
 
 // Serve the HTML form at root
-app.get('/', (req, res) => {
+const rootHandler = (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+};
+app.get('/', rootHandler);
 
 // Global error handler
-app.use((err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ 
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
-});
+};
+app.use(errorHandler);
 
 // 404 handler
-app.use((req, res) => {
+const notFoundHandler = (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
-});
+};
+app.use(notFoundHandler);
 
 // Initialize database and start server
 async function startServer() {
@@ -69,18 +72,28 @@ async function startServer() {
 }
 
 // Handle graceful shutdown
-process.on('SIGINT', () => {
+const handleSigint = () => {
   console.log('\nReceived SIGINT. Graceful shutdown...');
   process.exit(0);
-});
+};
 
-process.on('SIGTERM', () => {
+const handleSigterm = () => {
   console.log('\nReceived SIGTERM. Graceful shutdown...');
   process.exit(0);
-});
+};
+
+process.on('SIGINT', handleSigint);
+process.on('SIGTERM', handleSigterm);
 
 if (require.main === module) {
   startServer();
 }
+
+app.startServer = startServer;
+app.rootHandler = rootHandler;
+app.errorHandler = errorHandler;
+app.notFoundHandler = notFoundHandler;
+app.handleSigint = handleSigint;
+app.handleSigterm = handleSigterm;
 
 module.exports = app;
